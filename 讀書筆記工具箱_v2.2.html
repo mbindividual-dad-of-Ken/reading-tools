@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="theme-color" content="#0d0d18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="筆記工具箱 v2.2">
+<title>讀書筆記工具箱 v2.2</title>
+<link rel="manifest" href="#" id="manifest-link">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{
+  --bg:#0d0d18;--s1:#14142a;--s2:#1c1c32;--s3:#22223a;--s4:#2a2a45;
+  --b1:rgba(255,255,255,.07);--b2:rgba(255,255,255,.14);--b3:rgba(255,255,255,.24);
+  --t1:#eeedf5;--t2:#9896b8;--t3:#5a5878;
+  --v:#7c6af7;--v2:#a89cf8;--vb:rgba(124,106,247,.14);
+  --gold:#f0c060;--goldb:rgba(240,192,96,.12);
+  --teal:#3ecfb8;--tealb:rgba(62,207,184,.1);
+  --coral:#f07868;--coralb:rgba(240,120,104,.1);
+  --green:#5dd890;--greenb:rgba(93,216,144,.1);
+  --pink:#e880b8;--pinkb:rgba(232,128,184,.1);
+  --manda:#a8d8b0;--mandab:rgba(168,216,176,.08);
+  --r:14px;--rs:8px;
+  --sans:'Noto Sans TC',sans-serif;--serif:'Noto Serif TC',serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:14px;min-height:100vh;overflow-x:hidden}
+
+/* ─── CHROME ─── */
+.hd{position:sticky;top:0;z-index:200;background:rgba(13,13,24,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:10px 14px;gap:10px}
+.hd-title{font-family:var(--serif);font-size:14px;font-weight:600;color:var(--v2);flex:1}
+.hd-ver{font-size:10px;color:var(--t3);border:1px solid var(--b2);border-radius:20px;padding:2px 7px}
+
+/* ─── 4 MAIN TABS ─── */
+.main-tabs{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--b1);background:var(--bg)}
+.mt-btn{padding:12px 4px;min-height:56px;text-align:center;font-size:11px;color:var(--t3);cursor:pointer;border:none;background:transparent;font-family:var(--sans);line-height:1.4;transition:.14s;border-bottom:2px solid transparent;touch-action:manipulation}
+.mt-btn .icon{font-size:20px;display:block;margin-bottom:3px}
+.mt-btn.active{color:var(--v2);border-bottom-color:var(--v)}
+.mt-btn:hover{color:var(--t1)}
+
+/* ─── SUB TABS ─── */
+.sub-tabs{display:flex;gap:5px;padding:10px 12px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--b1)}
+.sub-tabs::-webkit-scrollbar{display:none}
+.st-btn{flex-shrink:0;padding:7px 13px;min-height:36px;border-radius:18px;border:1px solid var(--b1);background:transparent;color:var(--t2);font-size:13px;font-family:var(--sans);cursor:pointer;white-space:nowrap;transition:.13s;touch-action:manipulation}
+.st-btn:hover{border-color:var(--b2);color:var(--t1)}
+.st-btn.active{background:var(--v);border-color:var(--v);color:#fff;font-weight:500}
+.st-btn.manda.active{background:#4a7a54;border-color:#4a7a54}
+
+/* ─── MAIN CONTENT ─── */
+.main{padding:14px 14px 80px;max-width:640px;margin:0 auto}
+.pane{display:none}.pane.active{display:block}
+
+/* ─── TYPOGRAPHY ─── */
+.slabel{font-size:11px;font-weight:500;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
+.field{margin-bottom:10px}
+.hint{font-size:11px;color:var(--t3);margin-top:4px;line-height:1.5}
+
+/* ─── CARDS ─── */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:13px;margin-bottom:10px}
+.card-v{border-left:3px solid var(--v)}
+.card-teal{border-left:3px solid var(--teal)}
+.card-gold{border-left:3px solid var(--gold)}
+.card-pink{border-left:3px solid var(--pink)}
+.card-green{border-left:3px solid var(--green)}
+.card-coral{border-left:3px solid var(--coral)}
+.card-manda{border:1px solid rgba(168,216,176,.18);background:var(--mandab)}
+
+/* ─── INPUTS ─── */
+textarea,input[type=text],input[type=date],input[type=password],select{
+  width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:var(--rs);
+  color:var(--t1);font-family:var(--sans);font-size:15px;padding:11px 13px;
+  outline:none;transition:border-color .14s;resize:vertical;line-height:1.7;
+  /* 手寫輸入友善：最小高度讓手寫有空間；不限制縮放 */
+  -webkit-text-size-adjust:100%;touch-action:manipulation}
+textarea:focus,input[type=text]:focus,input[type=date]:focus,input[type=password]:focus,select:focus{
+  border-color:var(--v);box-shadow:0 0 0 2px rgba(124,106,247,.15)}
+textarea{min-height:80px}
+/* 手寫模式：焦點時自動加高讓書寫有更多空間 */
+textarea:focus{min-height:110px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+/* 自動存檔狀態列 */
+.autosave-bar{font-size:11px;color:var(--t3);text-align:right;padding:3px 2px;min-height:18px;transition:color .3s}
+.autosave-bar.saving{color:var(--gold)}
+.autosave-bar.saved{color:var(--teal)}
+
+/* ─── STEP BADGE ─── */
+.srow{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.sbadge{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+
+/* ─── BUTTONS ─── */
+/* 手寫/觸控友善：最小高度 44px（Apple HIG 標準），padding 加大 */
+.btn{padding:10px 16px;min-height:44px;border-radius:var(--rs);border:1px solid var(--b2);background:transparent;color:var(--t1);font-family:var(--sans);font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.14s}
+.btn:hover{background:var(--s2)}
+.btn-v{background:var(--v);border-color:var(--v);color:#fff}.btn-v:hover{background:#8f7ef8}
+.btn-teal{background:var(--tealb);border-color:rgba(62,207,184,.3);color:var(--teal)}
+.btn-gold{background:var(--goldb);border-color:rgba(240,192,96,.3);color:var(--gold)}
+.btn-coral{background:var(--coralb);border-color:rgba(240,120,104,.3);color:var(--coral)}
+.btn-manda{background:rgba(74,122,84,.25);border-color:rgba(168,216,176,.3);color:var(--manda)}
+.btn-green{background:var(--greenb);border-color:rgba(93,216,144,.3);color:var(--green)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+
+/* ─── OUTPUT ─── */
+.outbox{display:none;margin-top:10px;background:#08080f;border:1px solid var(--b1);border-radius:var(--rs);padding:11px;font-family:var(--mono);font-size:11px;line-height:1.75;color:var(--teal);white-space:pre-wrap;word-break:break-all;max-height:260px;overflow-y:auto}
+
+/* ─── RECALL ─── */
+.recall-wrap{border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.recall-wrap.hidden .recall-right{opacity:.04;pointer-events:none;user-select:none}
+.recall-cols{display:grid;grid-template-columns:38% 62%}
+.recall-left{padding:11px;border-right:1px solid var(--b1);background:var(--s1)}
+.recall-right{padding:11px;background:var(--s2)}
+.recall-hd{font-size:11px;color:var(--t3);padding:7px 11px;border-bottom:1px solid var(--b1);background:var(--s3);display:flex;justify-content:space-between;align-items:center}
+.recall-sum{border-top:1px solid var(--b1)}
+.rcl-btn{padding:3px 9px;border-radius:12px;border:1px solid rgba(62,207,184,.3);background:var(--tealb);color:var(--teal);font-size:11px;cursor:pointer}
+
+/* ─── 5R CHECKLIST ─── */
+.cklist{display:flex;flex-direction:column;gap:6px}
+.cr{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2);cursor:pointer}
+.cr input[type=checkbox]{width:15px;height:15px;accent-color:var(--v);flex-shrink:0}
+.cr.done{color:var(--t3);text-decoration:line-through}
+
+/* ─── REVIEW STRIP ─── */
+.rvstrip{background:var(--s2);border-radius:var(--rs);padding:9px 11px;margin-top:10px}
+.rvdates{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.rd{font-size:11px;padding:3px 8px;border-radius:12px;background:var(--s1);border:1px solid var(--b1);color:var(--t2)}
+
+/* ─── 推薦器 ─── */
+.sel3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:13px}
+.sel3 > div{display:flex;flex-direction:column;gap:3px}
+.sel3 select{font-size:12px;padding:7px 8px}
+.sel-label{font-size:11px;color:var(--t2)}
+.rec-card{display:none;border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-top:10px}
+.rec-hd{padding:11px 13px;background:var(--goldb);border-bottom:1px solid var(--b1)}
+.rec-name{font-size:14px;font-weight:600;color:var(--gold)}
+.rec-score{font-size:12px;color:var(--t2);margin-top:2px}
+.rec-body{padding:11px 13px;font-size:12px;line-height:1.75;color:var(--t2)}
+.rec-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.rec-tag{font-size:11px;padding:2px 8px;border-radius:12px;background:var(--vb);color:var(--v2);border:1px solid rgba(124,106,247,.25)}
+.rec-bad{background:var(--coralb);color:var(--coral);border-color:rgba(240,120,104,.25)}
+.rec-combo{font-size:12px;color:var(--teal);margin-top:7px;padding-top:7px;border-top:1px solid var(--b1)}
+
+/* ─── 10卡表格 ─── */
+.tc-table{width:100%;border-collapse:collapse;font-size:12px}
+.tc-table th{padding:6px 8px;border:1px solid var(--b1);background:var(--s3);color:var(--t2);font-weight:500;text-align:left}
+.tc-table td{padding:3px;border:1px solid var(--b1);background:var(--s2)}
+.tc-table td input{width:100%;background:transparent;border:none;color:var(--t1);font-size:12px;padding:3px 4px;outline:none}
+.tc-table td input:focus{background:var(--s3)}
+.tc-num{color:var(--t3);font-size:11px;text-align:center;width:22px}
+
+/* ─── A2 品質檢查器 ─── */
+.a2-quality{display:none;margin-top:6px;padding:8px 10px;border-radius:var(--rs);font-size:12px;line-height:1.6}
+.a2-warn{background:var(--coralb);border:1px solid rgba(240,120,104,.25);color:var(--coral)}
+.a2-ok{background:var(--greenb);border:1px solid rgba(93,216,144,.25);color:var(--green)}
+
+/* ─── A2 五欄結構 ─── */
+.a2-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.a2f{display:flex;flex-direction:column;gap:3px}
+.a2l{font-size:10px;color:var(--t3);letter-spacing:.04em}
+.a2i{font-size:12px;padding:6px 8px;border-radius:6px;border:1px solid var(--b1);background:var(--s2);color:var(--t1);font-family:var(--sans);outline:none;width:100%}
+.a2i:focus{border-color:var(--v)}
+
+/* ─── 決策筆記 ─── */
+.decision-tabs{display:flex;gap:6px;margin-bottom:12px}
+.dt-btn{flex:1;padding:8px;border-radius:var(--rs);border:1px solid var(--b1);background:transparent;color:var(--t2);font-size:12px;cursor:pointer;text-align:center;transition:.13s}
+.dt-btn.active{background:var(--vb);border-color:var(--v);color:var(--v2)}
+.decision-pane{display:none}.decision-pane.active{display:block}
+
+/* ─── 本機筆記庫 ─── */
+.db-toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.db-search{flex:1;min-width:140px;font-size:13px;padding:7px 10px}
+.note-list{display:flex;flex-direction:column;gap:8px}
+.note-item{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:11px 13px;cursor:pointer;transition:.13s}
+.note-item:hover{border-color:var(--b2);background:var(--s2)}
+.ni-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
+.ni-title{font-size:13px;font-weight:500;color:var(--t1)}
+.ni-date{font-size:11px;color:var(--t3)}
+.ni-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.ni-tag{font-size:11px;padding:2px 7px;border-radius:10px}
+.ni-method{background:var(--vb);color:var(--v2);border:1px solid rgba(124,106,247,.2)}
+.ni-status-draft{background:rgba(240,192,96,.12);color:var(--gold);border:1px solid rgba(240,192,96,.2)}
+.ni-status-done{background:var(--greenb);color:var(--green);border:1px solid rgba(93,216,144,.2)}
+.ni-status-review{background:var(--coralb);color:var(--coral);border:1px solid rgba(240,120,104,.2)}
+.ni-preview{font-size:12px;color:var(--t3);margin-top:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ni-actions{display:flex;gap:5px;margin-top:8px}
+.empty-state{text-align:center;padding:40px 20px;color:var(--t3)}
+.empty-state .es-icon{font-size:36px;margin-bottom:10px}
+.empty-state p{font-size:12px;line-height:1.7}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:var(--r);padding:16px;width:100%;max-width:580px;margin:auto}
+.modal-title{font-size:14px;font-weight:500;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:transparent;border:none;color:var(--t2);font-size:18px;cursor:pointer;padding:2px 6px}
+.review-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:12px;background:var(--coralb);color:var(--coral);border:1px solid rgba(240,120,104,.3)}
+
+/* ─── AI ─── */
+.ai-result{display:none;border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-top:11px}
+.ai-row{padding:10px 13px;border-bottom:1px solid var(--b1)}
+.ai-row:last-child{border-bottom:none}
+.ai-rlabel{font-size:11px;color:var(--t3);margin-bottom:5px}
+.ai-rtext{font-size:13px;line-height:1.65;color:var(--t2)}
+.loading-msg{font-size:12px;color:var(--t3);padding:8px 0;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--b2);border-top-color:var(--v);border-radius:50%;animation:spin .7s linear infinite;margin-right:6px;vertical-align:-2px}
+.frow{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.f-btn{font-size:12px;padding:4px 10px;border-radius:14px;border:1px solid var(--b1);background:transparent;color:var(--t2);cursor:pointer;transition:.13s}
+.f-btn.active,.f-btn:hover{background:var(--vb);border-color:var(--v);color:var(--v2)}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--b2);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--v);cursor:pointer}
+
+/* ─── 比較表 ─── */
+.mc{border:1px solid var(--b1);border-radius:var(--r);padding:11px 13px;margin-bottom:9px;background:var(--s1)}
+.mc-nm{font-size:13px;font-weight:500;margin-bottom:7px;display:flex;justify-content:space-between}
+.mc-bg{font-size:10px;padding:2px 7px;border-radius:10px}
+.mc-row{display:flex;gap:7px;margin-bottom:3px;font-size:12px}
+.mc-k{color:var(--t3);min-width:46px;flex-shrink:0}
+.mc-v{color:var(--t2);line-height:1.5}
+.mc-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:7px}
+.mc-tag{font-size:11px;padding:2px 6px;border-radius:10px;background:var(--s2);color:var(--t3);border:1px solid var(--b1)}
+
+/* ─── 手帳 ─── */
+.jnl-title{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--v2);text-align:center;margin-bottom:13px}
+.habit-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;font-size:12px;color:var(--t2)}
+.hdots{display:flex;gap:3px}
+.dot{width:21px;height:21px;border-radius:50%;border:1px solid var(--b2);background:transparent;cursor:pointer;transition:.13s}
+.dot.done{background:var(--teal);border-color:var(--teal)}
+.g-row{display:flex;gap:6px;margin-bottom:6px;align-items:center}
+.g-num{font-size:12px;color:var(--t3);min-width:16px}
+.g-input{flex:1;font-size:12px;padding:5px 8px;border-radius:6px;border:1px solid var(--b1);background:var(--s2);color:var(--t1);font-family:var(--sans);outline:none}
+.g-input:focus{border-color:var(--v)}
+
+/* ─── Manda ─── */
+.manda-title{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--manda);margin-bottom:4px}
+.manda-sub{font-size:12px;color:rgba(168,216,176,.45);margin-bottom:14px;line-height:1.5}
+.manda-label{font-size:11px;color:rgba(168,216,176,.5);margin-bottom:5px}
+.manda-ta{background:rgba(10,20,12,.5)!important;border-color:rgba(168,216,176,.15)!important;color:rgba(232,240,233,.9)!important}
+.manda-ta:focus{border-color:rgba(168,216,176,.4)!important}
+.threads-box{background:#000;border-radius:10px;padding:11px 13px;margin-top:10px;font-size:13px;line-height:1.7;color:#e8e8e8;border:1px solid #222;display:none}
+.threads-hdl{font-size:12px;color:#555;margin-bottom:5px}
+
+/* ─── PWA ─── */
+.pwa-step{display:flex;gap:10px;margin-bottom:10px}
+.pwa-num{width:22px;height:22px;border-radius:50%;background:var(--vb);border:1px solid rgba(124,106,247,.3);color:var(--v2);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.pwa-tit{font-size:13px;font-weight:500;margin-bottom:2px}
+.pwa-desc{font-size:12px;color:var(--t2);line-height:1.55}
+.ptabs{display:flex;gap:5px;margin-bottom:11px}
+.pt-btn{flex:1;padding:6px;border-radius:var(--rs);border:1px solid var(--b1);background:transparent;color:var(--t2);font-size:12px;cursor:pointer;text-align:center;transition:.13s}
+.pt-btn.active{background:var(--vb);border-color:var(--v);color:var(--v2)}
+.pt-pane{display:none}.pt-pane.active{display:block}
+.code-block{background:#06060e;border:1px solid var(--b1);border-radius:var(--rs);padding:9px;font-family:var(--mono);font-size:11px;color:var(--teal);line-height:1.7;margin-top:5px;word-break:break-all}
+
+/* ─── TOAST & INSTALL ─── */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--s1);border:1px solid var(--b2);border-radius:var(--rs);padding:9px 15px;font-size:13px;color:var(--t1);transition:transform .22s;z-index:999;pointer-events:none;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#install-banner{display:none;background:linear-gradient(135deg,var(--vb),var(--tealb));border:1px solid rgba(124,106,247,.25);border-radius:var(--r);padding:10px 12px;margin-bottom:11px;align-items:center;gap:10px}
+#install-banner p{font-size:12px;color:var(--t2);flex:1;line-height:1.5}
+::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- MODAL: 檢視筆記 -->
+<div class="modal-overlay" id="note-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modal-title-text">筆記</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="outbox" id="modal-content" style="display:block;max-height:360px"></div>
+    <div class="toolbar" style="margin-top:10px">
+      <button class="btn btn-v" onclick="downloadModalNote()">下載 .md</button>
+      <button class="btn btn-teal" onclick="copyModalNote()">複製</button>
+      <button class="btn btn-coral" onclick="deleteCurrentNote()">刪除</button>
+    </div>
+  </div>
+</div>
+
+<header class="hd">
+  <div class="hd-title">📚 讀書筆記工具箱</div>
+  <div class="autosave-bar" id="autosave-bar"></div>
+  <div class="hd-ver" id="hd-ver">v2.2</div>
+</header>
+
+<!-- ████ 4 MAIN TABS ████ -->
+<div class="main-tabs">
+  <button class="mt-btn active" onclick="switchMain(0,this)"><span class="icon">🧭</span>我該怎麼記</button>
+  <button class="mt-btn" onclick="switchMain(1,this)"><span class="icon">✏️</span>開始寫筆記</button>
+  <button class="mt-btn" onclick="switchMain(2,this)"><span class="icon">🤖</span>AI 幫我整理</button>
+  <button class="mt-btn" onclick="switchMain(3,this)"><span class="icon">📂</span>保存與回顧</button>
+</div>
+
+<!-- ════ SUB TABS per main ════ -->
+<div class="sub-tabs" id="sub-0">
+  <button class="st-btn active" onclick="goSub('sub-0',0,this,'p-sel')">方法選擇器</button>
+  <button class="st-btn" onclick="goSub('sub-0',1,this,'p-compare')">六大方法比較</button>
+</div>
+<div class="sub-tabs" id="sub-1" style="display:none">
+  <button class="st-btn active" onclick="goSub('sub-1',0,this,'p-cornell')">康乃爾 5R</button>
+  <button class="st-btn" onclick="goSub('sub-1',1,this,'p-ria')">RIA 便籤</button>
+  <button class="st-btn" onclick="goSub('sub-1',2,this,'p-tencard')">一書 10 卡</button>
+  <button class="st-btn" onclick="goSub('sub-1',3,this,'p-zk')">卡片盒</button>
+  <button class="st-btn" onclick="goSub('sub-1',4,this,'p-academic')">學術筆記</button>
+  <button class="st-btn" onclick="goSub('sub-1',5,this,'p-decision')">決策筆記</button>
+  <button class="st-btn manda" onclick="goSub('sub-1',6,this,'p-manda')">🌿 Manda</button>
+</div>
+<div class="sub-tabs" id="sub-2" style="display:none">
+  <button class="st-btn active" onclick="goSub('sub-2',0,this,'p-ai')">AI 解析</button>
+  <button class="st-btn" onclick="goSub('sub-2',1,this,'p-sturgeon')">史特金篩選</button>
+</div>
+<div class="sub-tabs" id="sub-3" style="display:none">
+  <button class="st-btn active" onclick="goSub('sub-3',0,this,'p-library')">筆記庫</button>
+  <button class="st-btn" onclick="goSub('sub-3',1,this,'p-journal')">閱讀手帳</button>
+  <button class="st-btn" onclick="goSub('sub-3',2,this,'p-pwa')">PWA 部署</button>
+  <button class="st-btn" onclick="goSub('sub-3',3,this,'p-admin')">⚙ 管理者</button>
+</div>
+
+<main class="main">
+<div id="install-banner">
+  <p>📲 安裝到主畫面，離線也能使用</p>
+  <button class="btn btn-v" onclick="installPWA()">安裝</button>
+</div>
+
+<!-- ══ 方法選擇器 ══ -->
+<div class="pane active" id="p-sel">
+  <p style="font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.65">先決定這本書要變成什麼，再決定怎麼記。</p>
+  <div class="sel3">
+    <div><div class="sel-label">閱讀目的</div>
+      <select id="sel-goal">
+        <option>考試/備考</option><option>解決現實問題</option><option>寫文章/輸出</option>
+        <option>學術研究</option><option>商業企劃/決策</option><option>純興趣/輕閱讀</option>
+      </select></div>
+    <div><div class="sel-label">書籍類型</div>
+      <select id="sel-type">
+        <option>教科書/考科</option><option>致用類/管理書</option><option>論文/研究報告</option>
+        <option>商業案例/政策</option><option>概念型/哲學型</option><option>靈感型/散文型</option>
+      </select></div>
+    <div><div class="sel-label">期待結果</div>
+      <select id="sel-output">
+        <option>記得住</option><option>做得到</option><option>寫得出來</option>
+        <option>研究可引用</option><option>做出判斷</option><option>留下感覺</option>
+      </select></div>
+  </div>
+  <div class="toolbar">
+    <button class="btn btn-v" onclick="recommend()">產生推薦</button>
+    <button class="btn" onclick="copySelPrompt()">複製 AI Prompt</button>
+    <button class="btn" onclick="resetSel()">清空</button>
+  </div>
+  <div class="rec-card" id="rec-card">
+    <div class="rec-hd">
+      <div class="rec-name" id="rec-name"></div>
+      <div class="rec-score" id="rec-score"></div>
+    </div>
+    <div class="rec-body">
+      <div id="rec-why"></div>
+      <div id="rec-combo" class="rec-combo"></div>
+      <div class="rec-tags" id="rec-tags"></div>
+      <div class="rec-tags" id="rec-bad"></div>
+      <button id="rec-go" class="btn btn-v" style="margin-top:10px;width:100%" onclick="">直接前往這個工具 →</button>
+    </div>
+  </div>
+  <div class="outbox" id="sel-prompt-out"></div>
+</div>
+
+<!-- ══ 六大比較 ══ -->
+<div class="pane" id="p-compare">
+  <div class="frow">
+    <button class="f-btn active" onclick="filterM('all',this)">全部</button>
+    <button class="f-btn" onclick="filterM('考試',this)">考試</button>
+    <button class="f-btn" onclick="filterM('致用',this)">致用</button>
+    <button class="f-btn" onclick="filterM('研究',this)">研究</button>
+    <button class="f-btn" onclick="filterM('商業',this)">商業</button>
+    <button class="f-btn" onclick="filterM('視覺',this)">視覺</button>
+  </div>
+  <div id="methods-list"></div>
+</div>
+
+<!-- ══ 康乃爾 ══ -->
+<div class="pane" id="p-cornell">
+  <div class="row2">
+    <input type="text" id="cn-title" placeholder="書名／章節">
+    <input type="date" id="cn-date">
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+    <span style="font-size:12px;color:var(--t2)">雙欄筆記</span>
+    <button class="rcl-btn" onclick="toggleRecall()">👁 主動回憶模式</button>
+  </div>
+  <div class="recall-wrap" id="recall-wrap">
+    <div class="recall-hd">
+      <span>提示欄（課後 24h）</span><span>筆記欄（即時記錄）</span>
+    </div>
+    <div class="recall-cols">
+      <div class="recall-left">
+        <textarea id="cn-cue" style="min-height:160px;background:transparent;border:none;border-radius:0" placeholder="關鍵字或提問句&#10;&#10;Q1:&#10;Q2:&#10;Q3:"></textarea>
+      </div>
+      <div class="recall-right">
+        <div class="slabel" style="margin-bottom:4px">漸進式高亮</div>
+        <textarea id="cn-hl" style="min-height:48px;background:transparent;border:1px solid rgba(240,192,96,.2);border-radius:6px" placeholder="精確原文精粹…"></textarea>
+        <div class="slabel" style="margin:7px 0 4px">正式筆記</div>
+        <textarea id="cn-notes" style="min-height:90px;background:transparent;border:none;border-radius:0" placeholder="短句、例子、數據…"></textarea>
+      </div>
+    </div>
+    <div class="recall-sum">
+      <div class="recall-hd"><span>摘要欄（完全消化後）</span></div>
+      <textarea id="cn-sum" style="min-height:52px;background:transparent;border:none;border-radius:0" placeholder="1–3 句話，總結本頁最核心的觀點…"></textarea>
+    </div>
+  </div>
+  <div class="card" style="margin-top:9px">
+    <div class="slabel" style="margin-bottom:7px">5R 完成進度</div>
+    <div class="cklist">
+      <label class="cr" id="cr0"><input type="checkbox" onchange="check5r(0)"> Record — 已完成課中筆記</label>
+      <label class="cr" id="cr1"><input type="checkbox" onchange="check5r(1)"> Reduce — 已填提示欄（24h 內）</label>
+      <label class="cr" id="cr2"><input type="checkbox" onchange="check5r(2)"> Recite — 遮住右欄，自我復述</label>
+      <label class="cr" id="cr3"><input type="checkbox" onchange="check5r(3)"> Reflect — 找出認知盲點</label>
+      <label class="cr" id="cr4"><input type="checkbox" onchange="check5r(4)"> Review — 依排程完成複習</label>
+    </div>
+  </div>
+  <div class="rvstrip">
+    <div class="slabel">間隔複習排程</div>
+    <div class="rvdates" id="cn-rdates"><span class="rd">今天</span><span class="rd">+3天</span><span class="rd">+7天</span><span class="rd">+30天</span></div>
+  </div>
+  <div class="toolbar">
+    <button class="btn btn-v" onclick="saveCN()">儲存到筆記庫</button>
+    <button class="btn btn-teal" onclick="downloadMD('cn')">下載 .md</button>
+    <button class="btn" onclick="copyCN()">複製</button>
+  </div>
+  <div class="outbox" id="cn-out"></div>
+</div>
+
+<!-- ══ RIA ══ -->
+<div class="pane" id="p-ria">
+  <div class="field"><input type="text" id="ria-book" placeholder="書名／章節（選填）"></div>
+  <div class="card card-v">
+    <div class="srow"><span class="sbadge" style="background:rgba(90,120,255,.2);color:#8899ff">R</span><span style="font-size:12px;color:var(--t2)">摘錄原文片段</span></div>
+    <textarea id="ria-r" placeholder="貼入書中對你最有啟發的那段原文…"></textarea>
+  </div>
+  <div class="card card-teal">
+    <div class="srow"><span class="sbadge" style="background:rgba(62,207,184,.2);color:#3ecfb8">I</span><span style="font-size:12px;color:var(--t2)">用自己的話重述</span></div>
+    <textarea id="ria-i" placeholder="用一個很累的人也聽得懂的話說…&#10;（切忌生搬硬套原文詞彙）"></textarea>
+  </div>
+  <div class="card card-gold">
+    <div class="srow"><span class="sbadge" style="background:rgba(240,192,96,.2);color:#f0c060">A1</span><span style="font-size:12px;color:var(--t2)">聯繫你的親身經驗</span></div>
+    <div class="field"><input type="text" id="a1-ctx" placeholder="當時的情境是…"></div>
+    <div class="field"><input type="text" id="a1-act" placeholder="我採取的行動是…"></div>
+    <input type="text" id="a1-res" placeholder="結果是…">
+  </div>
+  <div class="card card-pink">
+    <div class="srow"><span class="sbadge" style="background:rgba(232,128,184,.2);color:#e880b8">A2</span><span style="font-size:12px;color:var(--t2)">具體行動規劃</span></div>
+    <div class="a2-grid">
+      <div class="a2f"><div class="a2l">時間</div><input class="a2i" id="a2-time" placeholder="下週二 09:00" oninput="checkA2()"></div>
+      <div class="a2f"><div class="a2l">場景</div><input class="a2i" id="a2-scene" placeholder="開會前" oninput="checkA2()"></div>
+      <div class="a2f"><div class="a2l">我會做的動作</div><input class="a2i" id="a2-act" placeholder="把一段觀點轉成…" oninput="checkA2()"></div>
+      <div class="a2f"><div class="a2l">可檢核結果</div><input class="a2i" id="a2-check" placeholder="完成一張卡片" oninput="checkA2()"></div>
+      <div class="a2f" style="grid-column:1/-1"><div class="a2l">最小版本</div><input class="a2i" id="a2-min" placeholder="只寫 I 和 A2 也算完成"><p class="hint" style="margin-top:4px">避免寫「我要多注意」，請寫成一個真的做得到的動作</p></div>
+    </div>
+    <div class="a2-quality" id="a2-quality"></div>
+  </div>
+  <div class="toolbar">
+    <button class="btn btn-v" onclick="saveRIA()">儲存到筆記庫</button>
+    <button class="btn btn-teal" onclick="downloadMD('ria')">下載 .md</button>
+    <button class="btn" onclick="copyRIA()">複製</button>
+  </div>
+  <div class="outbox" id="ria-out"></div>
+</div>
+
+<!-- ══ 一書10卡 ══ -->
+<div class="pane" id="p-tencard">
+  <div class="field"><input type="text" id="tc-book" placeholder="書名"></div>
+  <div class="card card-gold" style="margin-bottom:10px">
+    <div class="slabel" style="margin-bottom:5px">這本書先回答一句話</div>
+    <textarea id="tc-one" placeholder="這本書真正想解決的問題是：" style="min-height:48px"></textarea>
+  </div>
+  <div style="overflow-x:auto;margin-bottom:10px">
+    <table class="tc-table" id="tc-table">
+      <thead><tr>
+        <th class="tc-num">#</th>
+        <th style="min-width:100px">核心觀點（陳述句）</th>
+        <th style="min-width:100px">我自己的話</th>
+        <th style="min-width:80px">可行動/引用/延伸</th>
+        <th style="min-width:70px">關聯 [[]]</th>
+      </tr></thead>
+      <tbody id="tc-body"></tbody>
+    </table>
+  </div>
+  <div class="card card-green">
+    <div class="slabel" style="margin-bottom:5px">讀完後，只選一件事</div>
+    <div class="field"><input type="text" id="tc-next" placeholder="我下週會試著："></div>
+    <input type="text" id="tc-min" placeholder="最小版本是：">
+  </div>
+  <div class="toolbar">
+    <button class="btn btn-v" onclick="saveTC()">儲存到筆記庫</button>
+    <button class="btn btn-teal" onclick="downloadMD('tc')">下載大矩陣 .md</button>
+    <button class="btn btn-gold" onclick="batchExportZIP()">⚡ 批量匯出 10 張原子卡 .zip</button>
+  </div>
+  <div class="outbox" id="tc-out"></div>
+</div>
+
+<!-- ══ 卡片盒 ══ -->
+<div class="pane" id="p-zk">
+  <div class="field"><input type="text" id="zk-title" placeholder="卡片標題（一句完整陳述句）"></div>
+  <div class="row2">
+    <input type="text" id="zk-source" placeholder="來源書目">
+    <input type="text" id="zk-page" placeholder="頁碼 p.42">
+  </div>
+  <div class="field"><div class="slabel">核心概念（一張卡只放一個想法）</div>
+    <textarea id="zk-idea" style="min-height:72px"></textarea></div>
+  <div class="field"><div class="slabel">支撐證據／引文</div>
+    <textarea id="zk-ev" style="min-height:44px" placeholder="來源、引文、頁碼…"></textarea></div>
+  <div class="field"><div class="slabel">關聯卡片</div>
+    <div class="row2">
+      <input type="text" id="zk-lc" placeholder="對比：[[]]">
+      <input type="text" id="zk-ls" placeholder="支撐：[[]]">
+    </div>
+    <input type="text" id="zk-le" placeholder="延伸：[[]]">
+  </div>
+  <div class="row2" style="margin-top:8px">
+    <input type="text" id="zk-ua" placeholder="未來用途：文章">
+    <input type="text" id="zk-uw" placeholder="未來用途：工作">
+  </div>
+  <input type="text" id="zk-tags" placeholder="#標籤1 #標籤2" style="margin-bottom:10px">
+  <div class="toolbar">
+    <button class="btn btn-v" onclick="saveZK()">儲存到筆記庫</button>
+    <button class="btn btn-teal" onclick="downloadMD('zk')">下載 .md</button>
+  </div>
+  <div class="outbox" id="zk-out"></div>
+</div>
+
+<!-- ══ 學術筆記 ══ -->
+<div class="pane" id="p-academic">
+  <div class="row2">
+    <input type="text" id="ac-author" placeholder="作者姓名">
+    <input type="text" id="ac-year" placeholder="出版年">
+  </div>
+  <div class="field"><input type="text" id="ac-title" placeholder="篇名／章名"></div>
+  <div class="row2">
+    <input type="text" id="ac-journal" placeholder="期刊／書名">
+    <input type="text" id="ac-page" placeholder="期數、頁碼">
+  </div>
+  <div class="field"><div class="slabel">核心研究問題</div><textarea id="ac-rq" style="min-height:48px"></textarea></div>
+  <div class="field"><div class="slabel">主要發現</div><textarea id="ac-finding" style="min-height:52px"></textarea></div>
+  <div class="field"><div class="slabel">精確引文</div><textarea id="ac-quote" style="min-height:44px"></textarea></div>
+  <div class="field"><div class="slabel">研究侷限</div><textarea id="ac-limit" style="min-height:44px"></textarea></div>
+  <div class="field"><div class="slabel">個人批判 / 可延伸問題</div><textarea id="ac-critique" style="min-height:44px"></textarea></div>
+  <div class="field"><input type="text" id="ac-atoms" placeholder="可轉成的原子卡片：[[卡片1]] [[卡片2]]"></div>
+  <div class="toolbar">
+    <button class="btn btn-v" onclick="saveAC()">儲存到筆記庫</button>
+    <button class="btn btn-teal" onclick="downloadMD('ac')">下載 .md</button>
+  </div>
+  <div class="outbox" id="ac-out"></div>
+</div>
+
+<!-- ══ 決策筆記（麥肯錫＋黃金圈） ══ -->
+<div class="pane" id="p-decision">
+  <div class="decision-tabs">
+    <button class="dt-btn active" onclick="switchDecision(0,this)">☂️ 麥肯錫天空雨傘</button>
+    <button class="dt-btn" onclick="switchDecision(1,this)">🟡 黃金圈 Why→What</button>
+  </div>
+  <div class="decision-pane active" id="dp-mck">
+    <div class="field"><div class="slabel">頂部結論（一句話結論，放最前面）</div>
+      <input type="text" id="mck-top" placeholder="直接點出行動對策的精隨…"></div>
+    <div class="card card-v">
+      <div class="slabel" style="margin-bottom:5px">天空 — 現狀事實</div>
+      <textarea id="mck-sky" style="min-height:60px" placeholder="客觀發生了什麼事？數據或現場狀況是什麼？"></textarea>
+    </div>
+    <div class="card card-gold">
+      <div class="slabel" style="margin-bottom:5px">雨 — 原因與詮釋</div>
+      <textarea id="mck-rain" style="min-height:60px" placeholder="這個現狀代表什麼？為什麼會發生？"></textarea>
+    </div>
+    <div class="card card-teal">
+      <div class="slabel" style="margin-bottom:5px">傘 — 具體行動對策</div>
+      <textarea id="mck-umb" style="min-height:60px" placeholder="基於上述推論，接下來具體採取什麼行動？"></textarea>
+    </div>
+  </div>
+  <div class="decision-pane" id="dp-gc">
+    <div class="card card-gold">
+      <div class="slabel" style="margin-bottom:5px">WHY — 核心本質 / 根本動機</div>
+      <textarea id="gc-why" style="min-height:72px" placeholder="為什麼要做這件事？最底層的信仰或根本原因是什麼？"></textarea>
+    </div>
+    <div class="card card-v">
+      <div class="slabel" style="margin-bottom:5px">HOW — 執行路徑 / 核心策略</div>
+      <textarea id="gc-how" style="min-height:72px" placeholder="我們將如何落實這項信念？所採用的獨特方法是什麼？"></textarea>
+    </div>
+    <div class="card card-teal">
+      <div class="slabel" style="margin-bottom:5px">WHAT — 具體呈現 / 最終產出</div>
+      <textarea id="gc-what" style="min-height:72px" placeholder="最終具體做出來的產品、服務或行為是什麼？"></textarea>
+    </div>
+  </div>
+  <div class="toolbar">
+    <button class="btn btn-v" onclick="saveDEC()">儲存到筆記庫</button>
+    <button class="btn btn-teal" onclick="downloadMD('dec')">下載 .md</button>
+  </div>
+  <div class="outbox" id="dec-out"></div>
+</div>
+
+<!-- ══ Manda ══ -->
+<div class="pane" id="p-manda">
+  <div class="manda-title">今天碰到的一點</div>
+  <div class="manda-sub">不是閱讀效率工具，是讓一本書慢慢進到生活裡。</div>
+  <div class="card-manda card">
+    <div class="manda-label">今天讀到哪裡</div>
+    <input type="text" id="m-where" class="manda-ta" placeholder="不用有進度，碰到就好" style="border-radius:6px;padding:7px 9px;margin-bottom:10px">
+    <div class="manda-label">有哪一句停了一下</div>
+    <textarea id="m-quote" class="manda-ta" placeholder="不需要是金句，停在這裡就夠了…" style="min-height:52px;margin-bottom:10px"></textarea>
+    <div class="manda-label">為什麼停在這裡</div>
+    <textarea id="m-why" class="manda-ta" placeholder="說不清楚也可以，就是停了…" style="min-height:44px"></textarea>
+  </div>
+  <div class="card-manda card">
+    <div class="manda-label">留下一句（可以是你自己的話）</div>
+    <textarea id="m-keep" class="manda-ta" placeholder="不需要完整，不需要有用，留著就好…" style="min-height:52px"></textarea>
+  </div>
+  <div class="card-manda card">
+    <div class="manda-label">下次可以回來看這裡</div>
+    <input type="text" id="m-next" class="manda-ta" placeholder="第幾頁 / 哪個概念" style="border-radius:6px;padding:7px 9px;margin-bottom:8px">
+    <div class="manda-label">最小版本（可做可不做）</div>
+    <input type="text" id="m-min" class="manda-ta" placeholder="先放著也可以" style="border-radius:6px;padding:7px 9px">
+  </div>
+  <div class="toolbar">
+    <button class="btn btn-manda" onclick="genMandaThreads()">✦ Threads 文句</button>
+    <button class="btn btn-v" onclick="saveManda()">儲存到筆記庫</button>
+    <button class="btn" onclick="copyManda()">複製 MD</button>
+  </div>
+  <div class="threads-box" id="threads-box">
+    <div class="threads-hdl">＠你的帳號</div>
+    <div id="threads-text"></div>
+  </div>
+  <div class="outbox" id="manda-out"></div>
+</div>
+
+<!-- ══ AI 解析 ══ -->
+<div class="pane" id="p-ai">
+  <p style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.6">選擇 Prompt 類型，貼入內容，AI 幫你生成對應筆記</p>
+  <div class="frow" id="pt-row">
+    <button class="f-btn active" onclick="pickPT(0,this)">方法選擇</button>
+    <button class="f-btn" onclick="pickPT(1,this)">康乃爾</button>
+    <button class="f-btn" onclick="pickPT(2,this)">RIA 行動</button>
+    <button class="f-btn" onclick="pickPT(3,this)">學術文獻</button>
+    <button class="f-btn" onclick="pickPT(4,this)">原子卡片</button>
+    <button class="f-btn" onclick="pickPT(5,this)">Manda 低壓</button>
+  </div>
+  <textarea id="ai-text" style="min-height:110px" placeholder="貼入書摘、文章段落、課程內容…"></textarea>
+  <div class="field" style="margin-top:10px">
+    <div class="slabel">Anthropic API Key（存本機，不上傳）</div>
+    <input type="password" id="api-key" placeholder="sk-ant-..." style="font-family:var(--mono);font-size:12px">
+  </div>
+  <div class="toolbar">
+    <button class="btn btn-v" id="ai-btn" onclick="callAI()">AI 生成筆記</button>
+    <button class="btn" onclick="copyAIPrompt()">複製 Prompt</button>
+  </div>
+  <p class="loading-msg" id="ai-loading"><span class="spinner"></span>生成中…</p>
+  <div class="ai-result" id="ai-result">
+    <div class="ai-row"><div class="ai-rlabel">AI 輸出</div><div class="ai-rtext" id="ai-output"></div></div>
+  </div>
+</div>
+
+<!-- ══ 史特金篩選 ══ -->
+<div class="pane" id="p-sturgeon">
+  <p style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.6">貼入章節文字，AI 執行 90% 過濾，只留黃金觀點</p>
+  <textarea id="sg-text" style="min-height:110px" placeholder="貼入書中章節或大段文字…"></textarea>
+  <div style="display:flex;align-items:center;gap:10px;margin:10px 0">
+    <span style="font-size:12px;color:var(--t2);white-space:nowrap">最多保留</span>
+    <input type="range" min="1" max="10" value="5" id="sg-limit" oninput="document.getElementById('sg-val').textContent=this.value">
+    <span style="font-size:13px;font-weight:500;min-width:18px" id="sg-val">5</span>
+    <span style="font-size:12px;color:var(--t2)">條</span>
+  </div>
+  <div class="toolbar"><button class="btn btn-v" id="sg-btn" onclick="filterGold()">提取黃金觀點</button></div>
+  <p class="loading-msg" id="sg-loading"><span class="spinner"></span>過濾中…</p>
+  <div id="sg-result" style="display:none;margin-top:11px">
+    <div class="slabel" id="sg-count"></div>
+    <div id="sg-items"></div>
+  </div>
+</div>
+
+<!-- ══ 筆記庫 ══ -->
+<div class="pane active" id="p-library">
+  <div class="db-toolbar">
+    <input type="text" class="db-search" id="db-search" placeholder="搜尋書名、標籤、內容…" oninput="renderLibrary()">
+    <select id="db-filter-method" style="width:auto;font-size:12px;padding:6px 8px" onchange="renderLibrary()">
+      <option value="">全部方法</option>
+      <option>康乃爾</option><option>RIA</option><option>一書10卡</option>
+      <option>卡片盒</option><option>學術筆記</option><option>決策筆記</option><option>Manda</option>
+    </select>
+    <select id="db-filter-status" style="width:auto;font-size:12px;padding:6px 8px" onchange="renderLibrary()">
+      <option value="">全部狀態</option>
+      <option>草稿</option><option>已匯出</option><option>待複習</option>
+    </select>
+  </div>
+  <div id="review-today-banner" style="display:none" class="card" style="border:1px solid rgba(240,120,104,.3);background:var(--coralb);margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--coral)">
+      <span>📅</span><span id="review-today-text"></span>
+    </div>
+  </div>
+  <div id="db-list" class="note-list"></div>
+</div>
+
+<!-- ══ 閱讀手帳 ══ -->
+<div class="pane" id="p-journal">
+  <div class="jnl-title" id="jnl-date"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px">
+    <div class="card">
+      <div class="slabel" style="margin-bottom:7px">習慣追蹤（本週）</div>
+      <div class="habit-row"><span>每日閱讀</span><div class="hdots" id="dots-1"></div></div>
+      <div class="habit-row"><span>RIA 卡片</span><div class="hdots" id="dots-2"></div></div>
+      <div class="habit-row"><span>存 Obsidian</span><div class="hdots" id="dots-3"></div></div>
+    </div>
+    <div class="card">
+      <div class="slabel" style="margin-bottom:7px">今日感恩</div>
+      <div class="g-row"><span class="g-num">1.</span><input class="g-input" id="g1" placeholder="感謝…"></div>
+      <div class="g-row"><span class="g-num">2.</span><input class="g-input" id="g2" placeholder="感謝…"></div>
+      <div class="g-row"><span class="g-num">3.</span><input class="g-input" id="g3" placeholder="感謝…"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="slabel" style="margin-bottom:7px">今日筆記摘要</div>
+    <div class="field"><input type="text" id="j-book" placeholder="書名或章節"></div>
+    <div class="field"><textarea id="j-insight" placeholder="今天最重要的一個觀點…" style="min-height:48px"></textarea></div>
+    <input type="text" id="j-action" placeholder="行動提醒：我要在何時做什麼？">
+  </div>
+  <div class="toolbar">
+    <button class="btn btn-v" onclick="copyJournal()">複製 Markdown</button>
+    <button class="btn btn-teal" onclick="downloadMD('jnl')">下載 .md</button>
+  </div>
+  <div class="outbox" id="jnl-out"></div>
+</div>
+
+<!-- ══ PWA ══ -->
+<div class="pane" id="p-pwa">
+  <div class="ptabs">
+    <button class="pt-btn active" onclick="switchPWA('github',this)">GitHub Pages</button>
+    <button class="pt-btn" onclick="switchPWA('netlify',this)">Netlify Drop</button>
+    <button class="pt-btn" onclick="switchPWA('local',this)">本機安裝</button>
+  </div>
+  <div class="pt-pane active" id="pt-github">
+    <div class="pwa-step"><div class="pwa-num">1</div><div><div class="pwa-tit">建立 GitHub Repository（Public）</div><div class="pwa-desc">New repository → 取名 <code>reading-tools</code></div></div></div>
+    <div class="pwa-step"><div class="pwa-num">2</div><div><div class="pwa-tit">上傳為 index.html</div><div class="pwa-desc">將此檔案改名 <code>index.html</code> 上傳至 repo 根目錄</div></div></div>
+    <div class="pwa-step"><div class="pwa-num">3</div><div><div class="pwa-tit">啟用 GitHub Pages</div><div class="pwa-desc">Settings → Pages → Source: main / (root) → Save</div></div></div>
+    <div class="pwa-step"><div class="pwa-num">4</div><div><div class="pwa-tit">手機安裝</div><div class="pwa-desc"><code>帳號.github.io/reading-tools</code> → 加到主畫面</div></div></div>
+  </div>
+  <div class="pt-pane" id="pt-netlify">
+    <div class="pwa-step"><div class="pwa-num">1</div><div><div class="pwa-tit">前往 Netlify Drop</div><div class="pwa-desc"><code>app.netlify.com/drop</code></div></div></div>
+    <div class="pwa-step"><div class="pwa-num">2</div><div><div class="pwa-tit">拖放部署</div><div class="pwa-desc">資料夾內放 <code>index.html</code>，整個拖到頁面即完成</div></div></div>
+    <div class="pwa-step"><div class="pwa-num">3</div><div><div class="pwa-tit">取得 HTTPS 網址後安裝</div><div class="pwa-desc">手機開啟 <code>xxx.netlify.app</code> → 加到主畫面</div></div></div>
+  </div>
+  <div class="pt-pane" id="pt-local">
+    <div class="pwa-step"><div class="pwa-num">1</div><div><div class="pwa-tit">本機開 HTTP Server</div><div class="code-block">python3 -m http.server 8080</div></div></div>
+    <div class="pwa-step"><div class="pwa-num">2</div><div><div class="pwa-tit">手機同 WiFi 開啟</div><div class="pwa-desc"><code>http://電腦IP:8080</code> → Safari/Chrome → 加到主畫面</div></div></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="slabel">已內建的 PWA 功能</div>
+    <div style="font-size:12px;color:var(--t2);line-height:1.9;margin-top:7px">
+      ✅ 手寫輸入支援（user-scalable=yes，觸控友善 44px 按鈕）<br>
+      ✅ Web App Manifest（Blob URL 動態注入）<br>
+      ✅ Service Worker（JSZip、首頁離線快取）<br>
+      ✅ 全螢幕獨立模式（無瀏覽器工具列）<br>
+      ✅ IndexedDB 本機筆記庫（搜尋、篩選、複習提醒）<br>
+      ✅ JSZip 批量原子卡片 .zip 匯出<br>
+      ✅ 草稿自動暫存（localStorage）
+    </div>
+  </div>
+</div>
+
+<!-- ══ 管理者面板 ══ -->
+<div class="pane" id="p-admin">
+  <div class="card" style="margin-bottom:10px">
+    <div class="slabel" style="margin-bottom:8px">系統狀態</div>
+    <div id="admin-stats" style="font-size:13px;color:var(--t2);line-height:2"></div>
+  </div>
+  <div class="card card-gold" style="margin-bottom:10px">
+    <div class="slabel" style="margin-bottom:8px">筆記庫備份</div>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.6">將所有筆記整批匯出為單一 JSON 備份檔，可在新裝置匯入還原。</p>
+    <div class="toolbar" style="margin-top:0">
+      <button class="btn btn-gold" onclick="exportAllJSON()">📦 匯出全部筆記 .json</button>
+      <button class="btn btn-teal" onclick="exportAllZIP()">⚡ 匯出全部 .md zip</button>
+    </div>
+    <div style="margin-top:10px">
+      <div class="slabel" style="margin-bottom:5px">從備份匯入</div>
+      <input type="file" id="import-file" accept=".json" onchange="importJSON(this)" style="font-size:12px;padding:6px">
+    </div>
+  </div>
+  <div class="card card-coral" style="margin-bottom:10px">
+    <div class="slabel" style="margin-bottom:8px">危險操作</div>
+    <div class="toolbar" style="margin-top:0">
+      <button class="btn btn-coral" onclick="clearAPIKey()">🔑 清除 API Key</button>
+      <button class="btn btn-coral" onclick="clearSWCache()">🔄 強制更新 SW 快取</button>
+      <button class="btn btn-coral" onclick="confirmClearAll()">⚠️ 清空全部筆記庫</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="slabel" style="margin-bottom:8px">版本資訊</div>
+    <div style="font-size:12px;color:var(--t2);line-height:2">
+      版本：v2.2<br>
+      建置日期：<span id="admin-build-date"></span><br>
+      IndexedDB：<span id="admin-db-status">檢查中…</span><br>
+      Service Worker：<span id="admin-sw-status">檢查中…</span><br>
+      手寫輸入：<span style="color:var(--teal)">✅ 已啟用（user-scalable=yes）</span>
+    </div>
+  </div>
+</div>
+</main>
+
+<script>
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+const mainPaneMap = [
+  ['p-sel','p-compare'],
+  ['p-cornell','p-ria','p-tencard','p-zk','p-academic','p-decision','p-manda'],
+  ['p-ai','p-sturgeon'],
+  ['p-library','p-journal','p-pwa','p-admin']
+];
+let currentMain = 0;
+
+function switchMain(idx, btn) {
+  document.querySelectorAll('.mt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentMain = idx;
+  // show correct sub-tabs
+  for(let i=0;i<4;i++){
+    const st = document.getElementById('sub-'+i);
+    if(st) st.style.display = i===idx ? 'flex' : 'none';
+  }
+  // activate first pane in group
+  const allPanes = mainPaneMap.flat();
+  allPanes.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('active');
+  });
+  const firstPane = document.getElementById(mainPaneMap[idx][0]);
+  if(firstPane) firstPane.classList.add('active');
+  // reset sub-tab highlighting
+  const stEl = document.getElementById('sub-'+idx);
+  if(stEl) {
+    stEl.querySelectorAll('.st-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  }
+}
+
+function goSub(subId, idx, btn, paneId) {
+  const allPanes = mainPaneMap.flat();
+  allPanes.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('active');
+  });
+  const pane = document.getElementById(paneId);
+  if(pane) pane.classList.add('active');
+  document.querySelectorAll('#'+subId+' .st-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Jump to a specific tool from selector
+function jumpToTool(mainIdx, paneId) {
+  const btn = document.querySelectorAll('.mt-btn')[mainIdx];
+  if(btn) switchMain(mainIdx, btn);
+  const pane = document.getElementById(paneId);
+  if(pane) {
+    mainPaneMap[mainIdx].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.classList.remove('active');
+    });
+    pane.classList.add('active');
+    // sync sub-tab highlight
+    const subEl = document.getElementById('sub-'+mainIdx);
+    if(subEl) {
+      const idx = mainPaneMap[mainIdx].indexOf(paneId);
+      subEl.querySelectorAll('.st-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+    }
+  }
+}
+
+function switchDecision(idx, btn) {
+  document.querySelectorAll('.decision-tabs .dt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.decision-pane').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+function switchPWA(id, btn) {
+  document.querySelectorAll('.ptabs .pt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.pt-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pt-'+id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+
+// ═══════════════════════════════════════════
+// IndexedDB
+// ═══════════════════════════════════════════
+let db;
+const DB_NAME='readingNotesDB', DB_VER=1, STORE='notes';
+function initDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(DB_NAME,DB_VER);
+    req.onupgradeneeded=e=>{
+      const d=e.target.result;
+      if(!d.objectStoreNames.contains(STORE)){
+        const s=d.createObjectStore(STORE,{keyPath:'id',autoIncrement:true});
+        s.createIndex('method','method',{unique:false});
+        s.createIndex('status','status',{unique:false});
+        s.createIndex('book','book',{unique:false});
+        s.createIndex('createdAt','createdAt',{unique:false});
+      }
+    };
+    req.onsuccess=e=>{db=e.target.result;res(db)};
+    req.onerror=()=>rej(req.error);
+  });
+}
+function dbAdd(note){
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    const req=tx.objectStore(STORE).add({...note,createdAt:Date.now(),status:note.status||'草稿'});
+    req.onsuccess=()=>res(req.result);
+    req.onerror=()=>rej(req.error);
+  });
+}
+function dbGetAll(){
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(STORE,'readonly');
+    const req=tx.objectStore(STORE).getAll();
+    req.onsuccess=()=>res(req.result);
+    req.onerror=()=>rej(req.error);
+  });
+}
+function dbDelete(id){
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    const req=tx.objectStore(STORE).delete(id);
+    req.onsuccess=()=>res();
+    req.onerror=()=>rej(req.error);
+  });
+}
+function dbUpdate(note){
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    const req=tx.objectStore(STORE).put(note);
+    req.onsuccess=()=>res();
+    req.onerror=()=>rej(req.error);
+  });
+}
+
+// ═══════════════════════════════════════════
+// frontmatter builder
+// ═══════════════════════════════════════════
+function fm(fields){
+  let s='---\n';
+  for(const[k,v] of Object.entries(fields)) s+=`${k}: "${v}"\n`;
+  s+='---\n\n';
+  return s;
+}
+function today(){ return new Date().toISOString().split('T')[0]; }
+
+// ═══════════════════════════════════════════
+// MARKDOWN BUILDERS
+// ═══════════════════════════════════════════
+const mdStore = {};
+
+function buildCN(){
+  const title=document.getElementById('cn-title').value||'未命名';
+  const date=document.getElementById('cn-date').value;
+  const cue=document.getElementById('cn-cue').value;
+  const hl=document.getElementById('cn-hl').value;
+  const notes=document.getElementById('cn-notes').value;
+  const sum=document.getElementById('cn-sum').value;
+  const fiveR=['Record','Reduce','Recite','Reflect','Review'];
+  const checks=fiveR.map((r,i)=>`- [${document.getElementById('cr'+i).querySelector('input').checked?'x':' '}] ${r}`).join('\n');
+  return fm({type:'康乃爾筆記',source:title,created:date||today(),tags:'讀書筆記, 康乃爾, 主動回憶'})+
+`# ${title}\n\n## 💡 提示欄\n\n${cue||'（未填）'}\n\n## 📝 漸進式高亮\n\n${hl||'（未填）'}\n\n## 筆記欄\n\n${notes||'（未填）'}\n\n## 🎯 摘要\n\n${sum||'（未填）'}\n\n## 5R 進度\n\n${checks}\n\n## 間隔複習\n\n- 今天：☐\n- 3天後：☐\n- 1週後：☐\n- 1個月後：☐`;
+}
+function copyCN(){const md=buildCN();mdStore.cn=md;showOut('cn-out',md);navigator.clipboard&&navigator.clipboard.writeText(md);toast('✓ 已複製');}
+function saveCN(){const md=buildCN();mdStore.cn=md;saveNote({book:document.getElementById('cn-title').value||'未命名',method:'康乃爾',content:md});}
+
+function buildRIA(){
+  const book=document.getElementById('ria-book').value;
+  return fm({type:'RIA行動卡',book:book||'未命名',created:today(),status:'可嘗試',tags:'讀書筆記, RIA, 行動轉化'})+
+`# ${book||'RIA 卡片'}\n\n## R｜原文片段\n\n> ${document.getElementById('ria-r').value||'（未填）'}\n\n## I｜用自己的話重述\n\n${document.getElementById('ria-i').value||'（未填）'}\n\n## A1｜過去的相關經驗\n\n- 情境：${document.getElementById('a1-ctx').value||'（未填）'}\n- 當時我怎麼做：${document.getElementById('a1-act').value||'（未填）'}\n- 結果：${document.getElementById('a1-res').value||'（未填）'}\n\n## A2｜具體行動規劃\n\n- 時間：${document.getElementById('a2-time').value||'（未填）'}\n- 場景：${document.getElementById('a2-scene').value||'（未填）'}\n- 我會做的動作：${document.getElementById('a2-act').value||'（未填）'}\n- 可檢核結果：${document.getElementById('a2-check').value||'（未填）'}\n- 最小版本：${document.getElementById('a2-min').value||'（未填）'}\n\n> 避免寫「我要多注意」。請寫成一個真的做得到的動作。`;
+}
+function copyRIA(){const md=buildRIA();mdStore.ria=md;showOut('ria-out',md);navigator.clipboard&&navigator.clipboard.writeText(md);toast('✓ 已複製');}
+function saveRIA(){saveNote({book:document.getElementById('ria-book').value||'未命名',method:'RIA',content:buildRIA()});}
+
+function buildTC(){
+  const book=document.getElementById('tc-book').value||'未命名';
+  let tbl='| # | 核心觀點 | 我自己的話 | 可行動/引用/延伸 | 關聯 |\n|---|---|---|---|---|\n';
+  for(let i=1;i<=10;i++){
+    const p=document.getElementById(`tc${i}p`)?.value||'';
+    const m=document.getElementById(`tc${i}m`)?.value||'';
+    const a=document.getElementById(`tc${i}a`)?.value||'';
+    const l=document.getElementById(`tc${i}l`)?.value||'';
+    tbl+=`| ${i} | ${p||'　'} | ${m||'　'} | ${a||'　'} | ${l||'　'} |\n`;
+  }
+  return fm({type:'一本書的10張卡片',book:book,created:today(),tags:'讀書筆記, 十張卡片'})+
+`# ${book}\n\n## 這本書先回答一句話\n\n> ${document.getElementById('tc-one').value||'（未填）'}\n\n## 10 張卡片\n\n${tbl}\n## 讀完後，只選一件事\n\n- 我下週會試著：${document.getElementById('tc-next').value||'（未填）'}\n- 最小版本是：${document.getElementById('tc-min').value||'（未填）'}`;
+}
+function copyTC(){const md=buildTC();mdStore.tc=md;showOut('tc-out',md);navigator.clipboard&&navigator.clipboard.writeText(md);toast('✓ 已複製');}
+function saveTC(){saveNote({book:document.getElementById('tc-book').value||'未命名',method:'一書10卡',content:buildTC()});}
+
+// JSZip 批量匯出 (from v3)
+function batchExportZIP(){
+  if(typeof JSZip==='undefined'){toast('JSZip 載入中，請稍後再試');return;}
+  const zip=new JSZip();
+  const book=document.getElementById('tc-book').value||'未命名';
+  let count=0;
+  for(let i=1;i<=10;i++){
+    const title=document.getElementById(`tc${i}p`)?.value?.trim()||'';
+    const mywords=document.getElementById(`tc${i}m`)?.value?.trim()||'';
+    const link=document.getElementById(`tc${i}l`)?.value?.trim()||'';
+    if(!title) continue;
+    count++;
+    const md=fm({id:new Date().toISOString().replace(/[-:T.Z]/g,'').slice(0,12),title:title,source:book,created:today(),tags:'卡片盒筆記',type:'permanent-note'})+
+`# ${title}\n\n## 核心概念\n\n${mywords||'（未填）'}\n\n## 關聯卡片\n\n${link||'（尚未填入）'}\n\n## 來源\n\n${book}`;
+    zip.file(`${title.replace(/[\\/:*?"<>|]/g,'_')}.md`, md);
+  }
+  if(!count){toast('請至少填一張卡片的標題');return;}
+  zip.generateAsync({type:'blob'}).then(blob=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`${book}_原子卡片包.zip`;
+    a.click();
+    toast(`✓ 已匯出 ${count} 張原子卡片`);
+  });
+}
+
+function buildZK(){
+  const title=document.getElementById('zk-title').value||'未命名';
+  const source=document.getElementById('zk-source').value;
+  const page=document.getElementById('zk-page').value;
+  const tags=document.getElementById('zk-tags').value.replace(/#/g,'').split(/\s+/).filter(Boolean).join(', ');
+  const id=new Date().toISOString().replace(/[-:T.Z]/g,'').slice(0,12);
+  return fm({id:id,title:title,created:today(),source:source,...(page?{page}:{}),tags:tags,type:'permanent-note'})+
+`# ${title}\n\n## 核心概念\n\n${document.getElementById('zk-idea').value||'（未填）'}\n\n## 支撐證據\n\n${document.getElementById('zk-ev').value||'（未填）'}\n\n## 與哪些卡片有關\n\n- 對比：${document.getElementById('zk-lc').value||'（未填）'}\n- 支撐：${document.getElementById('zk-ls').value||'（未填）'}\n- 延伸：${document.getElementById('zk-le').value||'（未填）'}\n\n## 未來可能用在哪裡\n\n- 文章：${document.getElementById('zk-ua').value||'（未填）'}\n- 工作：${document.getElementById('zk-uw').value||'（未填）'}\n\n## 來源\n\n${source+(page?' '+page:'')||'（未填）'}`;
+}
+function saveZK(){saveNote({book:document.getElementById('zk-title').value||'未命名',method:'卡片盒',content:buildZK()});}
+
+function buildAC(){
+  const author=document.getElementById('ac-author').value,year=document.getElementById('ac-year').value;
+  const title=document.getElementById('ac-title').value,journal=document.getElementById('ac-journal').value,page=document.getElementById('ac-page').value;
+  const apa=author&&year&&title?`${author}，${year}，〈${title}〉，${journal}，${page}。`:'（請填入完整資訊）';
+  let md=fm({title:title||'未命名',author:author||'',year:year||'',tags:'學術筆記, APA',date:today()})+
+`# ${title||'未命名'}\n\n## 核心研究問題\n\n${document.getElementById('ac-rq').value||'（未填）'}\n\n## 主要發現\n\n${document.getElementById('ac-finding').value||'（未填）'}`;
+  const q=document.getElementById('ac-quote').value;
+  if(q) md+=`\n\n## 精確引文\n\n    ${q.replace(/\n/g,'\n    ')}`;
+  md+=`\n\n## 研究侷限\n\n${document.getElementById('ac-limit').value||'（未填）'}\n\n## 個人批判\n\n${document.getElementById('ac-critique').value||'（未填）'}`;
+  const atoms=document.getElementById('ac-atoms').value;
+  if(atoms) md+=`\n\n## 可轉成的原子卡片\n\n${atoms}`;
+  md+=`\n\n## 參考文獻\n\n${apa}`;
+  return md;
+}
+function saveAC(){saveNote({book:document.getElementById('ac-title').value||'未命名',method:'學術筆記',content:buildAC()});}
+
+function buildDEC(){
+  const isMck=document.getElementById('dp-mck').classList.contains('active');
+  if(isMck){
+    const top=document.getElementById('mck-top').value;
+    return fm({type:'麥肯錫決策筆記',created:today(),tags:'讀書筆記, 決策思考'})+
+`# 麥肯錫天空雨傘\n\n## 頂部結論\n\n**${top||'（未填）'}**\n\n## ☁ 天空（現狀事實）\n\n${document.getElementById('mck-sky').value||'（未填）'}\n\n## 🌧 雨（原因與詮釋）\n\n${document.getElementById('mck-rain').value||'（未填）'}\n\n## ☂ 傘（具體行動對策）\n\n${document.getElementById('mck-umb').value||'（未填）'}`;
+  } else {
+    return fm({type:'黃金圈筆記',created:today(),tags:'讀書筆記, 決策思考'})+
+`# 黃金圈 Why→How→What\n\n## WHY（核心本質）\n\n${document.getElementById('gc-why').value||'（未填）'}\n\n## HOW（執行路徑）\n\n${document.getElementById('gc-how').value||'（未填）'}\n\n## WHAT（具體產出）\n\n${document.getElementById('gc-what').value||'（未填）'}`;
+  }
+}
+function saveDEC(){const isMck=document.getElementById('dp-mck').classList.contains('active');saveNote({book:isMck?'麥肯錫筆記':'黃金圈筆記',method:'決策筆記',content:buildDEC()});}
+
+function buildManda(){
+  const date=new Date().toLocaleDateString('zh-TW');
+  return fm({type:'Manda低壓閱讀',created:today(),tags:'Manda, 慢讀'})+
+`# Manda 低壓閱讀 — ${date}\n\n## 今天碰到的一點\n\n今天讀到：${document.getElementById('m-where').value||'（未填）'}\n\n停在這一句：\n\n> ${document.getElementById('m-quote').value||'（未填）'}\n\n為什麼停在這裡：\n\n${document.getElementById('m-why').value||'（未填）'}\n\n## 留下一句\n\n${document.getElementById('m-keep').value||'（未填）'}\n\n## 下次回來看\n\n${document.getElementById('m-next').value||'先放著也可以'}\n\n## 最小版本\n\n${document.getElementById('m-min').value||'先放著也可以'}`;
+}
+function copyManda(){const md=buildManda();mdStore.manda=md;showOut('manda-out',md);navigator.clipboard&&navigator.clipboard.writeText(md);toast('✓ 已複製');}
+function saveManda(){saveNote({book:document.getElementById('m-where').value||'Manda 閱讀',method:'Manda',content:buildManda()});}
+
+function buildJournal(){
+  const date=new Date().toLocaleDateString('zh-TW');
+  const days=['一','二','三','四','五','六','日'];
+  const dotsStr=(id)=>Array.from(document.getElementById(id).querySelectorAll('.dot')).map((d,i)=>d.classList.contains('done')?'✓':days[i]).join(' ');
+  return `# 閱讀手帳 — ${date}\n\n## 習慣追蹤（本週）\n- 每日閱讀：${dotsStr('dots-1')}\n- RIA 卡片：${dotsStr('dots-2')}\n- 存入 Obsidian：${dotsStr('dots-3')}\n\n## 感恩日記\n1. ${document.getElementById('g1').value||'（未填）'}\n2. ${document.getElementById('g2').value||'（未填）'}\n3. ${document.getElementById('g3').value||'（未填）'}\n\n## 筆記摘要\n- 書名：${document.getElementById('j-book').value||'（未填）'}\n- 核心洞見：${document.getElementById('j-insight').value||'（未填）'}\n- 行動提醒：${document.getElementById('j-action').value||'（未填）'}`;
+}
+function copyJournal(){const md=buildJournal();mdStore.jnl=md;showOut('jnl-out',md);navigator.clipboard&&navigator.clipboard.writeText(md);toast('✓ 已複製');}
+
+// Generic show/download
+function showOut(id, md){ const el=document.getElementById(id); if(el){el.style.display='block';el.textContent=md;} }
+function downloadMD(key){
+  const builders={cn:buildCN,ria:buildRIA,tc:buildTC,zk:buildZK,ac:buildAC,dec:buildDEC,manda:buildManda,jnl:buildJournal};
+  const md=(builders[key]||(() => mdStore[key]||''))();
+  if(!md){toast('請先填寫內容');return;}
+  showOut(key+'-out',md);
+  const titles={cn:'cn-title',ria:'ria-book',tc:'tc-book',zk:'zk-title',ac:'ac-title',jnl:'j-book'};
+  const titleEl=document.getElementById(titles[key]||'cn-title');
+  const fn=(titleEl?.value||key)+'_筆記.md';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([md],{type:'text/markdown;charset=utf-8'}));
+  a.download=fn; a.click(); toast('✓ 已下載');
+}
+
+// ═══════════════════════════════════════════
+// 本機筆記庫 (IndexedDB)
+// ═══════════════════════════════════════════
+async function saveNote(note){
+  await dbAdd({...note, createdAt:Date.now(), status:'草稿'});
+  toast('✓ 已儲存到筆記庫');
+  renderLibrary();
+}
+
+let currentNoteId = null;
+async function renderLibrary(){
+  const notes = await dbGetAll();
+  const search = (document.getElementById('db-search')?.value||'').toLowerCase();
+  const filterMethod = document.getElementById('db-filter-method')?.value||'';
+  const filterStatus = document.getElementById('db-filter-status')?.value||'';
+  let filtered = notes.filter(n=>{
+    if(filterMethod && n.method!==filterMethod) return false;
+    if(filterStatus && n.status!==filterStatus) return false;
+    if(search && !((n.book||'').toLowerCase().includes(search)||(n.content||'').toLowerCase().includes(search)||(n.method||'').toLowerCase().includes(search))) return false;
+    return true;
+  }).sort((a,b)=>b.createdAt-a.createdAt);
+
+  // review banner
+  const now=Date.now();
+  const forReview=notes.filter(n=>{
+    if(n.method!=='康乃爾') return false;
+    const age=Math.floor((now-n.createdAt)/86400000);
+    return [3,7,30].includes(age) && n.status!=='已匯出';
+  });
+  const banner=document.getElementById('review-today-banner');
+  if(forReview.length>0){
+    banner.style.display='block';
+    document.getElementById('review-today-text').textContent=`今日待複習：${forReview.length} 份康乃爾筆記（建立後第 ${[...new Set(forReview.map(n=>Math.floor((now-n.createdAt)/86400000)))].join('、')} 天）`;
+  } else { banner.style.display='none'; }
+
+  const list=document.getElementById('db-list');
+  if(!filtered.length){
+    list.innerHTML=`<div class="empty-state"><div class="es-icon">📭</div><p>筆記庫還是空的。<br>寫完一篇筆記後，點「儲存到筆記庫」就會出現在這裡。</p></div>`;
+    return;
+  }
+  const statusClass={'草稿':'ni-status-draft','已匯出':'ni-status-done','待複習':'ni-status-review'};
+  list.innerHTML=filtered.map(n=>{
+    const d=new Date(n.createdAt).toLocaleDateString('zh-TW');
+    const preview=(n.content||'').replace(/^---[\s\S]*?---\n\n/,'').replace(/[#*`\[\]]/g,'').slice(0,60);
+    const age=Math.floor((now-n.createdAt)/86400000);
+    const reviewBadge=n.method==='康乃爾'&&[3,7,30].includes(age)?`<span class="review-badge">📅 今日可複習</span>`:'';
+    return `<div class="note-item" onclick="openNote(${n.id})">
+      <div class="ni-top">
+        <div class="ni-title">${escHtml(n.book||'未命名')} ${reviewBadge}</div>
+        <div class="ni-date">${d}</div>
+      </div>
+      <div class="ni-preview">${escHtml(preview)}</div>
+      <div class="ni-tags">
+        <span class="ni-tag ni-method">${n.method||''}</span>
+        <span class="ni-tag ${statusClass[n.status]||'ni-status-draft'}">${n.status||'草稿'}</span>
+      </div>
+      <div class="ni-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-teal" style="font-size:11px;padding:4px 8px" onclick="markExported(${n.id})">標記已匯出</button>
+        <button class="btn btn-coral" style="font-size:11px;padding:4px 8px" onclick="deleteNote(${n.id})">刪除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function openNote(id){
+  const notes=await dbGetAll();
+  const n=notes.find(x=>x.id===id);
+  if(!n) return;
+  currentNoteId=id;
+  document.getElementById('modal-title-text').textContent=`${n.book||'未命名'} — ${n.method||''}`;
+  document.getElementById('modal-content').textContent=n.content||'';
+  document.getElementById('note-modal').classList.add('open');
+}
+function closeModal(){document.getElementById('note-modal').classList.remove('open');currentNoteId=null;}
+function downloadModalNote(){
+  if(!currentNoteId) return;
+  dbGetAll().then(notes=>{
+    const n=notes.find(x=>x.id===currentNoteId);
+    if(!n) return;
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([n.content||''],{type:'text/markdown;charset=utf-8'}));
+    a.download=`${n.book||'未命名'}_${n.method||'筆記'}.md`;
+    a.click();
+    markExported(currentNoteId);
+    toast('✓ 已下載');
+  });
+}
+function copyModalNote(){
+  const content=document.getElementById('modal-content').textContent;
+  navigator.clipboard&&navigator.clipboard.writeText(content);
+  toast('✓ 已複製');
+}
+function deleteCurrentNote(){
+  if(!currentNoteId) return;
+  if(confirm('確定要刪除這筆記錄嗎？')){
+    deleteNote(currentNoteId);
+    closeModal();
+  }
+}
+async function deleteNote(id){
+  await dbDelete(id);
+  toast('已刪除');
+  renderLibrary();
+}
+async function markExported(id){
+  const notes=await dbGetAll();
+  const n=notes.find(x=>x.id===id);
+  if(n){await dbUpdate({...n,status:'已匯出'});}
+  renderLibrary();
+  toast('✓ 已標記匯出');
+}
+
+// ═══════════════════════════════════════════
+// 方法選擇器 (from preview.html + 組合推薦)
+// ═══════════════════════════════════════════
+const selRules=[
+  {keys:['考試','教科書','記得住'],m:'康乃爾筆記法',score:92,pane:'p-cornell',main:1,
+   why:'透過 5R 系統與主動回憶對抗遺忘曲線，記憶留存率提升 40%+',
+   combo:'搭配：康乃爾 → 間隔複習排程 → 今日待複習（筆記庫）',
+   tags:['考試','間隔重複','5R'],not:['Manda','卡片盒']},
+  {keys:['解決','致用','做得到'],m:'RIA 便籤法',score:89,pane:'p-ria',main:1,
+   why:'A2 五欄結構確保行動真的做得到；A1 三欄讓知識連接真實經驗',
+   combo:'搭配：RIA → A2 行動檢查器 → 筆記庫追蹤執行狀態',
+   tags:['致用','行為改變','A2五欄'],not:['康乃爾','學術文獻']},
+  {keys:['寫文章','寫得出來'],m:'一書10卡 + 卡片盒',score:86,pane:'p-tencard',main:1,
+   why:'先用一書10卡強制篩選，再把每張卡片原子化存入卡片盒，長期寫作自然湧現主題',
+   combo:'搭配：一書10卡 → ⚡批量匯出 Obsidian zip → 卡片盒雙向連結',
+   tags:['寫作','Obsidian','原子卡片'],not:['康乃爾']},
+  {keys:['學術','論文','研究可引用'],m:'學術文獻筆記',score:94,pane:'p-academic',main:1,
+   why:'保留研究問題、發現、精確引文與侷限，可轉成原子卡片延伸研究',
+   combo:'搭配：學術筆記 → 原子卡片標題 → 卡片盒連結',
+   tags:['學術','APA','研究缺口'],not:['RIA','Manda']},
+  {keys:['商業','企劃','判斷'],m:'麥肯錫天空雨傘',score:85,pane:'p-decision',main:1,
+   why:'把問題拆成現狀→解釋→對策，天空雨傘框架訓練嚴謹解題邏輯',
+   combo:'搭配：麥肯錫 + 黃金圈雙工具，釐清 Why 之後再規劃 What',
+   tags:['商業','決策','職場'],not:['Manda','卡片盒']},
+  {keys:['興趣','靈感','感覺','留下'],m:'Manda 低壓閱讀',score:91,pane:'p-manda',main:1,
+   why:'不鼓勵你變強，只讓一本書慢慢進到生活裡；Threads 一句話輸出零壓力',
+   combo:'搭配：Manda → Threads 文句 → 筆記庫留存一點記憶',
+   tags:['低壓','陪伴','留下感覺'],not:['康乃爾','學術文獻','麥肯錫']},
+];
+let currentRecMain=1, currentRecPane='p-ria';
+function recommend(){
+  const g=document.getElementById('sel-goal').value,t=document.getElementById('sel-type').value,o=document.getElementById('sel-output').value;
+  const r=selRules.find(r=>r.keys.some(k=>(g+t+o).includes(k)))||selRules[1];
+  document.getElementById('rec-name').textContent='推薦：'+r.m;
+  document.getElementById('rec-score').textContent=`適合度 ${r.score}%`;
+  document.getElementById('rec-why').textContent=r.why;
+  document.getElementById('rec-combo').textContent=r.combo;
+  document.getElementById('rec-tags').innerHTML=r.tags.map(x=>`<span class="rec-tag">${x}</span>`).join('');
+  document.getElementById('rec-bad').innerHTML=(r.not||[]).map(x=>`<span class="rec-tag rec-bad">✗ 不推薦：${x}</span>`).join('');
+  currentRecMain=r.main; currentRecPane=r.pane;
+  document.getElementById('rec-card').style.display='block';
+  document.getElementById('rec-go').textContent=`直接前往「${r.m}」工具 →`;
+  localStorage.setItem('readingSelector',JSON.stringify({g,t,o}));
+}
+document.getElementById('rec-go').onclick=()=>jumpToTool(currentRecMain, currentRecPane);
+function copySelPrompt(){
+  const g=document.getElementById('sel-goal').value,t=document.getElementById('sel-type').value,o=document.getElementById('sel-output').value;
+  const r=selRules.find(x=>x.keys.some(k=>(g+t+o).includes(k)))||selRules[1];
+  const p=`請將我提供的內容整理成「${r.m}」。\n閱讀目的：${g}\n內容類型：${t}\n期待結果：${o}\n\n請輸出：\n1. 為什麼適合用這個方法\n2. 依照該方法整理後的筆記\n3. 下一步最小行動或複習方式\n\n內容如下：`;
+  navigator.clipboard&&navigator.clipboard.writeText(p);
+  showOut('sel-prompt-out',p);
+  toast('✓ 已複製 AI Prompt');
+}
+function resetSel(){localStorage.removeItem('readingSelector');document.getElementById('rec-card').style.display='none';document.getElementById('sel-prompt-out').style.display='none';}
+
+// ═══════════════════════════════════════════
+// 比較表
+// ═══════════════════════════════════════════
+const methodsData=[
+  {name:'康乃爾筆記法',tags:['考試','記憶'],badge:'5R',bc:'rgba(90,120,255,.18)',bt:'#8899ff',機制:'主動回憶 + 間隔重複',結構:'提示欄／漸進高亮／筆記欄／摘要欄',適用:'考試備考、長期記憶',優勢:'記憶留存率提升 40%+，5R 閉環',限制:'擴展性差，難以建立橫向知識體系'},
+  {name:'RIA 便籤法',tags:['致用','行動'],badge:'知行合一',bc:'rgba(62,207,184,.18)',bt:'#3ecfb8',機制:'知識轉化 + 成人學習',結構:'R→I→A1（三欄）→A2（五欄）',適用:'致用類、技能類書籍',優勢:'A2 五欄確保行動真的做得到',限制:'不適用考試備考或學術研究'},
+  {name:'一書10張卡片',tags:['致用','寫作'],badge:'10張上限',bc:'rgba(240,192,96,.18)',bt:'#f0c060',機制:'史特金定律篩選 + 原子化',結構:'一句話→10張卡上限→只選一件事',適用:'任何書籍，尤其致用類',優勢:'強制篩選 + 支援 JSZip 批量匯出',限制:'需高度主動思考，不適合純備考'},
+  {name:'麥肯錫天空雨傘',tags:['商業','職場'],badge:'天空雨傘',bc:'rgba(240,120,104,.18)',bt:'#f07868',機制:'現狀診斷 + 對策導向',結構:'頂部結論→天空→雨→傘',適用:'商業企劃、職場分析',優勢:'行動導向，訓練嚴謹解題邏輯',限制:'偏線性，難以處理複雜網狀關係'},
+  {name:'黃金圈筆記法',tags:['商業','視覺'],badge:'Why→What',bc:'rgba(232,128,184,.18)',bt:'#e880b8',機制:'目的論驅動深度思考',結構:'Why→How→What 同心圓',適用:'戰略規劃、核心概念',優勢:'幫助釐清本質，避免流於表面',限制:'對細節記錄不夠友善'},
+  {name:'卡片盒筆記法',tags:['研究','寫作'],badge:'原子卡片',bc:'rgba(124,106,247,.18)',bt:'#a89cf8',機制:'概念原子化 + 雙向連結',結構:'永久卡片→對比/支撐/延伸→MOC',適用:'長期寫作、研究、跨書整合',優勢:'外部大腦自然湧現研究主題',限制:'建立成本高，需長期投入'},
+  {name:'學術文獻筆記',tags:['研究','學術'],badge:'APA規範',bc:'rgba(93,216,144,.18)',bt:'#5dd890',機制:'研究問題 + 引文規範 + 批判',結構:'基本資訊→問題→發現→侷限→延伸',適用:'論文、學術研究',優勢:'保留研究脈絡，可轉原子卡片',限制:'格式嚴謹，非學術場景負擔重'},
+  {name:'Manda 低壓閱讀',tags:['興趣','情感'],badge:'慢慢進來',bc:'rgba(168,216,176,.18)',bt:'#a8d8b0',機制:'低摩擦留痕 + 情感錨定',結構:'今天碰到的一點→留下一句→最小版本',適用:'育兒後閱讀、靈感型書籍',優勢:'降低「應該讀完」的罪惡感',限制:'無系統性知識組織'},
+];
+let activeFilter='all';
+function filterM(tag,btn){
+  activeFilter=tag;
+  document.querySelectorAll('.frow .f-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMethods();
+}
+function renderMethods(){
+  const list=document.getElementById('methods-list');
+  if(!list) return;
+  const filtered=activeFilter==='all'?methodsData:methodsData.filter(m=>m.tags.includes(activeFilter));
+  list.innerHTML=filtered.map(m=>`<div class="mc">
+    <div class="mc-nm"><span>${m.name}</span><span class="mc-bg" style="background:${m.bc};color:${m.bt}">${m.badge}</span></div>
+    <div class="mc-row"><span class="mc-k">核心機制</span><span class="mc-v">${m.機制}</span></div>
+    <div class="mc-row"><span class="mc-k">版面結構</span><span class="mc-v">${m.結構}</span></div>
+    <div class="mc-row"><span class="mc-k">適用場景</span><span class="mc-v">${m.適用}</span></div>
+    <div class="mc-row"><span class="mc-k">優勢</span><span class="mc-v">${m.優勢}</span></div>
+    <div class="mc-row"><span class="mc-k">限制</span><span class="mc-v">${m.限制}</span></div>
+    <div class="mc-tags">${m.tags.map(t=>`<span class="mc-tag">${t}</span>`).join('')}</div>
+  </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// 康乃爾
+// ═══════════════════════════════════════════
+function toggleRecall(){document.getElementById('recall-wrap').classList.toggle('hidden');}
+function check5r(idx){const el=document.getElementById('cr'+idx);el.classList.toggle('done',el.querySelector('input').checked);}
+function updateCNDates(){
+  const v=document.getElementById('cn-date').value;if(!v)return;
+  const base=new Date(v);const offs=[0,3,7,30],labels=['今天','+3天','+7天','+30天'];
+  document.getElementById('cn-rdates').innerHTML=offs.map((d,i)=>{
+    const dt=new Date(base);dt.setDate(dt.getDate()+d);
+    return `<span class="rd">${labels[i]}（${dt.toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})}）</span>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// A2 品質檢查器 (from 文件四)
+// ═══════════════════════════════════════════
+const badPatterns=[/多注意/,/改善.*習慣/,/要努力/,/試著/,/盡量/,/希望.*可以/];
+const goodPatterns=[/\d+/, /分鐘|小時|天|週/, /前|後|時/, /張|篇|次|個/];
+function checkA2(){
+  const combined=[document.getElementById('a2-time').value,document.getElementById('a2-act').value,document.getElementById('a2-check').value].join(' ');
+  if(!combined.trim()){document.getElementById('a2-quality').style.display='none';return;}
+  const hasBad=badPatterns.some(p=>p.test(combined));
+  const hasGood=goodPatterns.some(p=>p.test(combined));
+  const q=document.getElementById('a2-quality');
+  q.style.display='block';
+  if(hasBad){q.className='a2-quality a2-warn';q.textContent='⚠ 這樣寫有點抽象——請補上具體時間、地點或可量化的結果';}
+  else if(hasGood){q.className='a2-quality a2-ok';q.textContent='✓ 這個 A2 有具體指標，看起來真的做得到';}
+  else{q.className='a2-quality';q.style.background='transparent';q.style.border='none';q.textContent='';}
+}
+
+// ═══════════════════════════════════════════
+// 一書10卡 表格
+// ═══════════════════════════════════════════
+function buildTenCardTable(){
+  const tbody=document.getElementById('tc-body');if(!tbody)return;
+  tbody.innerHTML='';
+  for(let i=1;i<=10;i++){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="tc-num">${i}</td>
+      <td><input id="tc${i}p" placeholder="核心觀點（陳述句）"></td>
+      <td><input id="tc${i}m" placeholder="我的話"></td>
+      <td><input id="tc${i}a" placeholder="行動/引用"></td>
+      <td><input id="tc${i}l" placeholder="[[]]"></td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+// ═══════════════════════════════════════════
+// Manda Threads
+// ═══════════════════════════════════════════
+function genMandaThreads(){
+  const quote=document.getElementById('m-quote').value.trim();
+  const keep=document.getElementById('m-keep').value.trim();
+  const min=document.getElementById('m-min').value.trim();
+  if(!quote&&!keep){toast('先填入一句話');return;}
+  const src=keep||quote;
+  const opts=[
+    `書沒有讀完，但今天有一句留下來了。\n\n「${src.slice(0,40)}」`,
+    `不是每次閱讀都要變成輸出，有時候只是先遇見。\n\n${src.slice(0,50)}`,
+    `今天停在這裡：\n\n「${src.slice(0,40)}」\n\n${min?'最小版本：'+min:'先放著也可以。'}`,
+  ];
+  const txt=opts[Math.floor(Math.random()*opts.length)];
+  document.getElementById('threads-text').textContent=txt;
+  document.getElementById('threads-box').style.display='block';
+  navigator.clipboard&&navigator.clipboard.writeText(txt);
+  toast('✓ 已複製 Threads 文句');
+}
+
+// ═══════════════════════════════════════════
+// AI 解析
+// ═══════════════════════════════════════════
+const ptTemplates=[
+  {name:'方法選擇',sys:`你是讀書筆記教練。推薦筆記法並說明原因，然後輸出轉換後的筆記與下一步行動。請用繁體中文。`},
+  {name:'康乃爾',sys:`把以下內容轉成康乃爾筆記格式：右欄重點筆記（短句）、左欄主動回憶問題（5條）、下欄3-5句摘要、5題自測題。標出最可能是認知盲點的地方。請用繁體中文。`},
+  {name:'RIA',sys:`把以下書摘轉成 RIA 行動卡：R（核心片段）、I（向很累的人也聽得懂的話說）、A1（情境/行動/結果三欄）、A2（時間/場景/動作/可檢核結果/最小版本五欄）。避免空泛語句。請用繁體中文。`},
+  {name:'學術文獻',sys:`整理成學術文獻筆記：文獻基本資訊、核心研究問題、主要發現、侷限、可延伸問題、可轉成的原子卡片標題。保持客觀。請用繁體中文。`},
+  {name:'原子卡片',sys:`把以下內容拆成原子卡片，每張卡片只保留一個想法，標題必須是一句完整陳述句。每張卡片包含：標題、核心概念、支撐證據、可連結概念、未來用途。請用繁體中文。`},
+  {name:'Manda低壓',sys:`請用 Manda 的語氣整理以下閱讀內容。不要像效率工具，不要鼓勵變強，不要使用自律、高效、堅持、成功等語氣。輸出：1)今天碰到的一點 2)可以先留下的一句 3)下次回來可以看哪裡 4)最小版本 5)一句適合發 Threads 的短句（不超過50字）。請用繁體中文。`},
+];
+let currentPT=0;
+function pickPT(idx,btn){currentPT=idx;document.querySelectorAll('#pt-row .f-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function getAPIKey(){
+  const v=document.getElementById('api-key').value.trim()||localStorage.getItem('anthropic_api_key')||'';
+  if(v) localStorage.setItem('anthropic_api_key',v);
+  return v;
+}
+async function callAI(){
+  const text=document.getElementById('ai-text').value.trim();
+  const key=getAPIKey();
+  if(!text){toast('請先貼入文字');return;}
+  if(!key){toast('請填入 API Key');return;}
+  const btn=document.getElementById('ai-btn'),loading=document.getElementById('ai-loading');
+  btn.disabled=true;loading.style.display='block';document.getElementById('ai-result').style.display='none';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,
+        system:ptTemplates[currentPT].sys,messages:[{role:'user',content:text}]})
+    });
+    const data=await resp.json();
+    const out=data.content.map(c=>c.text||'').join('');
+    document.getElementById('ai-output').textContent=out;
+    document.getElementById('ai-result').style.display='block';
+  }catch(e){toast('API 失敗：'+(e.message||'請確認 Key'));
+  }finally{btn.disabled=false;loading.style.display='none';}
+}
+function copyAIPrompt(){
+  const t=document.getElementById('ai-text').value.trim();
+  const p=ptTemplates[currentPT].sys+'\n\n內容如下：\n'+(t||'（請貼入內容）');
+  navigator.clipboard&&navigator.clipboard.writeText(p);toast('✓ 已複製 Prompt');
+}
+
+// 史特金
+async function filterGold(){
+  const text=document.getElementById('sg-text').value.trim();
+  const limit=document.getElementById('sg-limit').value;
+  const key=getAPIKey();
+  if(!text){toast('請先貼入文字');return;}
+  if(!key){toast('請填入 API Key');return;}
+  const btn=document.getElementById('sg-btn'),loading=document.getElementById('sg-loading');
+  btn.disabled=true;loading.style.display='block';document.getElementById('sg-result').style.display='none';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,
+        system:`執行史特金定律：最多 ${limit} 條，每條一句話（15-30字），剔除所有例子、數據、修飾語。只回傳JSON：{"points":["觀點一",...]}`,
+        messages:[{role:'user',content:text}]})
+    });
+    const data=await resp.json();
+    let raw=data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(raw);
+    document.getElementById('sg-count').textContent=`篩選出 ${parsed.points.length} 條黃金觀點`;
+    document.getElementById('sg-items').innerHTML=parsed.points.map((p,i)=>
+      `<div style="display:flex;gap:9px;padding:8px 0;border-bottom:1px solid var(--b1)"><span style="color:var(--gold);font-size:12px;min-width:18px;font-weight:500">${i+1}</span><span style="font-size:13px;color:var(--t1);line-height:1.5">${p}</span></div>`
+    ).join('');
+    document.getElementById('sg-result').style.display='block';
+  }catch(e){toast('API 失敗：'+(e.message||'請確認 Key'));
+  }finally{btn.disabled=false;loading.style.display='none';}
+}
+
+// ═══════════════════════════════════════════
+// 習慣點
+// ═══════════════════════════════════════════
+function buildDots(){
+  ['dots-1','dots-2','dots-3'].forEach(id=>{
+    const c=document.getElementById(id);if(!c)return;
+    ['一','二','三','四','五','六','日'].forEach(d=>{
+      const dot=document.createElement('div');dot.className='dot';dot.title=d;
+      dot.onclick=function(){this.classList.toggle('done')};c.appendChild(dot);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════
+// PWA
+// ═══════════════════════════════════════════
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('install-banner').style.display='flex';});
+function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;document.getElementById('install-banner').style.display='none';}}
+window.addEventListener('appinstalled',()=>{document.getElementById('install-banner').style.display='none';toast('✓ 已安裝到主畫面');});
+
+const manifest={name:'讀書筆記工具箱',short_name:'筆記工具箱',description:'RIA、康乃爾、一書10卡、決策筆記、筆記庫',start_url:'.',display:'standalone',background_color:'#0d0d18',theme_color:'#0d0d18',
+  icons:[{src:`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230d0d18'/><text x='96' y='130' text-anchor='middle' font-size='100'>📚</text></svg>`,sizes:'192x192',type:'image/svg+xml'},{src:`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%230d0d18'/><text x='256' y='345' text-anchor='middle' font-size='280'>📚</text></svg>`,sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]};
+document.getElementById('manifest-link').href=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'}));
+
+if('serviceWorker' in navigator){
+  const swCode=`
+const C='reading-v21';
+const ASSETS=[self.location.href,
+  'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'];
+self.addEventListener('install',e=>e.waitUntil(
+  caches.open(C).then(c=>Promise.all(ASSETS.map(u=>c.add(u).catch(()=>{})))).then(()=>self.skipWaiting())));
+self.addEventListener('activate',e=>e.waitUntil(
+  caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',e=>{
+  if(e.request.url.includes('api.anthropic.com')) return;
+  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{
+    if(resp.ok&&e.request.method==='GET'){
+      const clone=resp.clone();
+      caches.open(C).then(c=>c.put(e.request,clone));
+    }
+    return resp;
+  }).catch(()=>caches.match(e.request))));
+});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode],{type:'application/javascript'}))).catch(()=>{});
+}
+
+// ═══════════════════════════════════════════
+// 自動草稿暫存 (localStorage, 使用者角度)
+// ═══════════════════════════════════════════
+const DRAFT_FIELDS = {
+  cn: ['cn-title','cn-cue','cn-hl','cn-notes','cn-sum'],
+  ria: ['ria-book','ria-r','ria-i','a1-ctx','a1-act','a1-res','a2-time','a2-scene','a2-act','a2-check','a2-min'],
+  tc: ['tc-book','tc-one','tc-next','tc-min'],
+  zk: ['zk-title','zk-source','zk-page','zk-idea','zk-ev','zk-lc','zk-ls','zk-le','zk-ua','zk-uw','zk-tags'],
+  ac: ['ac-author','ac-year','ac-title','ac-journal','ac-page','ac-rq','ac-finding','ac-quote','ac-limit','ac-critique','ac-atoms'],
+  manda: ['m-where','m-quote','m-why','m-keep','m-next','m-min'],
+};
+let autosaveTimer = null;
+function setupAutosave() {
+  // Restore all drafts on load
+  Object.entries(DRAFT_FIELDS).forEach(([key, fields]) => {
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const saved = localStorage.getItem('draft_' + id);
+      if (saved) el.value = saved;
+      el.addEventListener('input', () => {
+        localStorage.setItem('draft_' + id, el.value);
+        showAutosaveStatus('saving');
+        clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(() => showAutosaveStatus('saved'), 800);
+      });
+    });
+  });
+  // Also 10-card rows (dynamic)
+  document.addEventListener('input', e => {
+    if (e.target.id && e.target.id.match(/^tc\d+(p|m|a|l)$/)) {
+      localStorage.setItem('draft_' + e.target.id, e.target.value);
+      showAutosaveStatus('saving');
+      clearTimeout(autosaveTimer);
+      autosaveTimer = setTimeout(() => showAutosaveStatus('saved'), 800);
+    }
+  });
+}
+function restoreTCDrafts() {
+  for (let i = 1; i <= 10; i++) {
+    ['p','m','a','l'].forEach(s => {
+      const el = document.getElementById(`tc${i}${s}`);
+      if (el) {
+        const saved = localStorage.getItem(`draft_tc${i}${s}`);
+        if (saved) el.value = saved;
+      }
+    });
+  }
+}
+function showAutosaveStatus(state) {
+  const bar = document.getElementById('autosave-bar');
+  if (!bar) return;
+  bar.className = 'autosave-bar ' + state;
+  bar.textContent = state === 'saving' ? '暫存中…' : '✓ 草稿已暫存';
+}
+
+// ═══════════════════════════════════════════
+// 管理者功能
+// ═══════════════════════════════════════════
+async function refreshAdminStats() {
+  const notes = await dbGetAll().catch(() => []);
+  const methods = {};
+  notes.forEach(n => { methods[n.method] = (methods[n.method]||0)+1; });
+  const swOk = 'serviceWorker' in navigator && (await navigator.serviceWorker.getRegistration().catch(()=>null));
+  document.getElementById('admin-stats').innerHTML =
+    `📓 筆記總數：<b style="color:var(--t1)">${notes.length}</b> 筆<br>` +
+    Object.entries(methods).map(([m,c]) => `　${m}：${c} 筆`).join('<br>') +
+    (notes.length ? '<br>' : '') +
+    `💾 IndexedDB：<span style="color:var(--teal)">正常</span><br>` +
+    `📡 草稿暫存：<span style="color:var(--teal)">localStorage 已啟用</span>`;
+  document.getElementById('admin-db-status').innerHTML = '<span style="color:var(--teal)">✅ 正常</span>';
+  document.getElementById('admin-sw-status').innerHTML = swOk
+    ? '<span style="color:var(--teal)">✅ 已註冊</span>'
+    : '<span style="color:var(--coral)">⚠ 未偵測到（需 HTTPS）</span>';
+  document.getElementById('admin-build-date').textContent = '2026-06-02';
+}
+
+async function exportAllJSON() {
+  const notes = await dbGetAll();
+  if (!notes.length) { toast('筆記庫目前是空的'); return; }
+  const payload = { exportedAt: new Date().toISOString(), version: 'v2.2', count: notes.length, notes };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
+  a.download = `讀書筆記庫備份_${today()}.json`;
+  a.click();
+  toast(`✓ 已匯出 ${notes.length} 筆筆記`);
+}
+
+async function exportAllZIP() {
+  if (typeof JSZip === 'undefined') { toast('JSZip 載入中，請稍後'); return; }
+  const notes = await dbGetAll();
+  if (!notes.length) { toast('筆記庫目前是空的'); return; }
+  const zip = new JSZip();
+  notes.forEach(n => {
+    const fn = `${n.method || 'note'}_${(n.book || '未命名').replace(/[\\/:*?"<>|]/g,'_')}_${n.id}.md`;
+    zip.file(fn, n.content || '');
+  });
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `讀書筆記庫_${today()}.zip`;
+  a.click();
+  toast(`✓ 已匯出 ${notes.length} 個 .md 檔案`);
+}
+
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      const notes = payload.notes || [];
+      if (!notes.length) { toast('備份檔案中沒有筆記'); return; }
+      let imported = 0;
+      for (const n of notes) {
+        // strip id so IndexedDB assigns new one
+        const { id: _id, ...rest } = n;
+        await dbAdd(rest).catch(() => {});
+        imported++;
+      }
+      toast(`✓ 已匯入 ${imported} 筆筆記`);
+      renderLibrary();
+      refreshAdminStats();
+    } catch(err) {
+      toast('匯入失敗：格式不正確');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function clearAPIKey() {
+  if (!confirm('確定要清除 API Key 嗎？')) return;
+  localStorage.removeItem('anthropic_api_key');
+  document.getElementById('api-key').value = '';
+  toast('✓ API Key 已清除');
+}
+
+async function clearSWCache() {
+  if (!confirm('確定要清除 Service Worker 快取並強制重新載入嗎？')) return;
+  const keys = await caches.keys().catch(() => []);
+  await Promise.all(keys.map(k => caches.delete(k)));
+  const reg = await navigator.serviceWorker?.getRegistration();
+  if (reg) await reg.unregister();
+  toast('✓ 快取已清除，正在重新載入…');
+  setTimeout(() => location.reload(true), 1200);
+}
+
+async function confirmClearAll() {
+  if (!confirm('⚠️ 這將永久刪除所有筆記，無法復原。確定嗎？')) return;
+  if (!confirm('請再次確認：真的要清空全部筆記庫？')) return;
+  const notes = await dbGetAll();
+  for (const n of notes) await dbDelete(n.id);
+  toast('已清空筆記庫');
+  renderLibrary();
+  refreshAdminStats();
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async ()=>{
+  // 日期
+  const d=document.getElementById('cn-date');
+  if(d){d.valueAsDate=new Date();updateCNDates();}
+  d&&d.addEventListener('change',updateCNDates);
+  document.getElementById('jnl-date').textContent=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric'})+' 閱讀手帳';
+  // API key
+  const k=localStorage.getItem('anthropic_api_key')||'';
+  document.getElementById('api-key').value=k;
+  document.getElementById('api-key').addEventListener('input',function(){localStorage.setItem('anthropic_api_key',this.value);});
+  // 選擇器記憶
+  try{const s=localStorage.getItem('readingSelector');if(s){const x=JSON.parse(s);document.getElementById('sel-goal').value=x.g;document.getElementById('sel-type').value=x.t;document.getElementById('sel-output').value=x.o;recommend();}}catch(e){}
+  // 10卡表格
+  buildTenCardTable();
+  // 習慣點
+  buildDots();
+  // 比較表
+  renderMethods();
+  // 自動草稿暫存 (使用者角度)
+  setupAutosave();
+  // 10卡草稿還原（表格建好後才能 restore）
+  restoreTCDrafts();
+  // IndexedDB
+  try{
+    await initDB();
+    renderLibrary();
+    refreshAdminStats();
+  }catch(e){
+    document.getElementById('db-list').innerHTML='<div class="empty-state"><p style="font-size:12px;color:var(--t3)">筆記庫無法在此環境使用（需要 IndexedDB 支援）</p></div>';
+  }
+});
+</script>
+</body>
+</html>
