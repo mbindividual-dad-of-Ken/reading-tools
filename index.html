@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0d0d18">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="筆記工具箱 v2.3">
-<title>讀書筆記工具箱 v2.3</title>
+<meta name="apple-mobile-web-app-title" content="慢讀筆記">
+<title>慢讀筆記</title>
 <link rel="manifest" href="#" id="manifest-link">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -259,24 +259,22 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 #install-banner{display:none;background:linear-gradient(135deg,var(--vb),var(--tealb));border:1px solid rgba(124,106,247,.25);border-radius:var(--r);padding:10px 12px;margin-bottom:11px;align-items:center;gap:10px}
 #install-banner p{font-size:12px;color:var(--t2);flex:1;line-height:1.5}
 ::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
-/* ─── ONBOARDING 首頁引導 ─── */
-.ob-wrap{padding:24px 0 8px}
-.ob-greeting{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--t1);margin-bottom:6px;line-height:1.3}
-.ob-sub{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.6}
-.ob-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
-.ob-card{border:1px solid var(--b1);border-radius:var(--r);padding:16px 18px;cursor:pointer;transition:.18s;display:flex;align-items:center;gap:14px;background:var(--s1);touch-action:manipulation;min-height:72px}
+.ob-wrap{padding:20px 0 8px}
+.ob-greeting{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--t1);margin-bottom:5px;line-height:1.3}
+.ob-sub{font-size:13px;color:var(--t2);margin-bottom:22px;line-height:1.6}
+.ob-cards{display:flex;flex-direction:column;gap:11px;margin-bottom:22px}
+.ob-card{border:1px solid var(--b1);border-radius:var(--r);padding:17px 18px;cursor:pointer;transition:.18s;display:flex;align-items:center;gap:14px;background:var(--s1);touch-action:manipulation;min-height:76px}
 .ob-card:hover,.ob-card:active{border-color:var(--b3);background:var(--s2);transform:translateX(3px)}
 .ob-card.ob-exam{border-left:4px solid var(--v)}
 .ob-card.ob-action{border-left:4px solid var(--teal)}
 .ob-card.ob-manda{border-left:4px solid var(--manda)}
 .ob-icon{font-size:28px;flex-shrink:0;width:36px;text-align:center}
-.ob-text{}
-.ob-label{font-size:15px;font-weight:500;color:var(--t1);margin-bottom:3px}
+.ob-text{flex:1}
+.ob-label{font-size:16px;font-weight:500;color:var(--t1);margin-bottom:3px}
 .ob-desc{font-size:12px;color:var(--t2);line-height:1.5}
-.ob-divider{display:flex;align-items:center;gap:10px;margin:16px 0 10px}
-.ob-divider::before,.ob-divider::after{content:'';flex:1;height:1px;background:var(--b1)}
-.ob-divider-text{font-size:11px;color:var(--t3);white-space:nowrap}
-.ob-recent{margin-bottom:4px}
+.ob-arrow{font-size:22px;color:var(--t3);flex-shrink:0;font-weight:300}
+/* 最近繼續 */
+.ob-recent{margin-bottom:16px}
 .ob-recent-title{font-size:11px;font-weight:500;color:var(--t3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
 .ob-recent-list{display:flex;flex-direction:column;gap:6px}
 .ob-recent-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--rs);background:var(--s1);border:1px solid var(--b1);cursor:pointer;transition:.13s;touch-action:manipulation}
@@ -286,7 +284,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .ob-ri-title{font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ob-ri-meta{font-size:11px;color:var(--t3);margin-top:1px}
 .ob-ri-method{font-size:11px;padding:2px 7px;border-radius:10px;background:var(--vb);color:var(--v2);border:1px solid rgba(124,106,247,.2);flex-shrink:0}
-.ob-empty-recent{font-size:12px;color:var(--t3);padding:8px 0;line-height:1.6}
+.ob-empty-recent{font-size:12px;color:var(--t3);padding:6px 0;line-height:1.7}
+/* 更多工具折疊 */
+.ob-more-toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t3);cursor:pointer;padding:8px 0;border-top:1px solid var(--b1);touch-action:manipulation;user-select:none}
+.ob-more-toggle svg{transition:transform .2s}
+.ob-more-toggle.open svg{transform:rotate(180deg)}
+.ob-more-panel{display:none;padding-top:10px}
+.ob-more-panel.open{display:block}
+.ob-more-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ob-more-btn{padding:10px 12px;min-height:44px;border-radius:var(--rs);border:1px solid var(--b1);background:var(--s1);color:var(--t2);font-size:12px;font-family:var(--sans);cursor:pointer;text-align:left;transition:.13s;touch-action:manipulation}
+.ob-more-btn:hover{background:var(--s2);border-color:var(--b2);color:var(--t1)}
 /* ─── AI PROMPT-FIRST ─── */
 .ai-mode-tabs{display:flex;gap:6px;margin-bottom:12px}
 .ai-mode-btn{flex:1;padding:8px;border-radius:var(--rs);border:1px solid var(--b1);background:transparent;color:var(--t2);font-size:12px;cursor:pointer;text-align:center;transition:.13s;touch-action:manipulation}
@@ -324,9 +331,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 </div>
 
 <header class="hd">
-  <div class="hd-title">📚 讀書筆記工具箱</div>
+  <div class="hd-title">🌿 慢讀筆記</div>
   <div class="autosave-bar" id="autosave-bar"></div>
-  <div class="hd-ver" id="hd-ver">v2.3</div>
+  <div class="hd-ver" id="hd-ver">v2.4</div>
 </header>
 
 <!-- ████ 4 MAIN TABS ████ -->
@@ -372,47 +379,65 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 <!-- ══ 首頁引導 ══ -->
 <div class="pane active" id="p-sel">
   <div class="ob-wrap">
+
+    <!-- 問候語 -->
     <div class="ob-greeting" id="ob-greeting">今天你想怎麼讀？</div>
-    <div class="ob-sub">選一個狀態，直接開始。</div>
+    <div class="ob-sub">不急著讀完。先留下能回來的入口。</div>
+
+    <!-- 三個情境，就這樣 -->
     <div class="ob-cards">
-      <div class="ob-card ob-exam" onclick="onboardGo('p-cornell',1,'幫我記得住')">
+      <div class="ob-card ob-exam" onclick="onboardGo('p-cornell',1)">
         <div class="ob-icon">🧠</div>
         <div class="ob-text">
-          <div class="ob-label">幫我記得住</div>
-          <div class="ob-desc">考試備考、需要長期記憶的內容<br>→ 康乃爾 5R + 間隔複習排程</div>
+          <div class="ob-label">我要記得住</div>
+          <div class="ob-desc">考試、備考、需要對抗遺忘的內容</div>
         </div>
+        <div class="ob-arrow">›</div>
       </div>
-      <div class="ob-card ob-action" onclick="onboardGo('p-ria',1,'幫我變成一個小行動')">
+      <div class="ob-card ob-action" onclick="onboardGo('p-ria',1)">
         <div class="ob-icon">⚡</div>
         <div class="ob-text">
-          <div class="ob-label">幫我變成一個小行動</div>
-          <div class="ob-desc">把書中的觀點用在生活或工作上<br>→ RIA 便籤法 + A2 行動規劃</div>
+          <div class="ob-label">我要用得上</div>
+          <div class="ob-desc">把這本書變成一個下週能做的事</div>
         </div>
+        <div class="ob-arrow">›</div>
       </div>
-      <div class="ob-card ob-manda" onclick="onboardGo('p-manda',1,'今天碰到一點就好')">
+      <div class="ob-card ob-manda" onclick="onboardGo('p-manda',1)">
         <div class="ob-icon">🌿</div>
         <div class="ob-text">
-          <div class="ob-label">今天碰到一點就好</div>
-          <div class="ob-desc">很累，只想留下一句話<br>→ Manda 低壓閱讀</div>
+          <div class="ob-label">我只是想留下來</div>
+          <div class="ob-desc">很累，但有一句話停住了</div>
         </div>
+        <div class="ob-arrow">›</div>
       </div>
     </div>
 
-    <div class="ob-divider"><span class="ob-divider-text">或者選其他工具</span></div>
-    <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px">
-      <button class="btn" style="font-size:12px" onclick="jumpToTool(0,'p-compare')">六大方法比較</button>
-      <button class="btn" style="font-size:12px" onclick="jumpToTool(1,'p-tencard')">一書 10 卡</button>
-      <button class="btn" style="font-size:12px" onclick="jumpToTool(1,'p-zk')">卡片盒</button>
-      <button class="btn" style="font-size:12px" onclick="jumpToTool(1,'p-academic')">學術筆記</button>
-      <button class="btn" style="font-size:12px" onclick="jumpToTool(1,'p-decision')">決策筆記</button>
-    </div>
-
+    <!-- 最近繼續：優先於「更多工具」 -->
     <div class="ob-recent" id="ob-recent-section">
       <div class="ob-recent-title">最近繼續</div>
       <div class="ob-recent-list" id="ob-recent-list">
-        <div class="ob-empty-recent">還沒有筆記。選一個狀態開始寫第一筆吧。</div>
+        <div class="ob-empty-recent">還沒有筆記。<br>選一個情境，留下第一筆。</div>
       </div>
     </div>
+
+    <!-- 更多工具：折疊，不佔版面 -->
+    <div class="ob-more-toggle" id="ob-more-toggle" onclick="toggleMoreTools()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px"><path d="M4 6l4 4 4-4"/></svg>
+      <span>更多工具</span>
+    </div>
+    <div class="ob-more-panel" id="ob-more-panel">
+      <div class="ob-more-grid">
+        <button class="ob-more-btn" onclick="jumpToTool(0,'p-recommend')">🎯 方法選擇器</button>
+        <button class="ob-more-btn" onclick="jumpToTool(1,'p-tencard')">📦 一書 10 卡</button>
+        <button class="ob-more-btn" onclick="jumpToTool(1,'p-zk')">🗂 卡片盒</button>
+        <button class="ob-more-btn" onclick="jumpToTool(1,'p-academic')">🎓 學術筆記</button>
+        <button class="ob-more-btn" onclick="jumpToTool(1,'p-decision')">☂️ 決策筆記</button>
+        <button class="ob-more-btn" onclick="jumpToTool(2,'p-ai')">🤖 AI 整理</button>
+        <button class="ob-more-btn" onclick="jumpToTool(0,'p-compare')">📊 方法比較</button>
+        <button class="ob-more-btn" onclick="jumpToTool(3,'p-library')">📂 筆記庫</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -751,7 +776,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
   </div>
   <div class="ai-key-toggle" id="ai-key-toggle" onclick="toggleAPIKeySection()">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6l4 4 4-4"/></svg>
-    <span>進階：直接用 API 生成（需要 Anthropic API Key）</span>
+    <span>本機自用：直接用 API 生成（需要自備 Anthropic API Key）</span>
   </div>
   <div class="ai-key-section" id="ai-key-section">
     <div class="field">
@@ -904,7 +929,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
   <div class="card">
     <div class="slabel" style="margin-bottom:8px">版本資訊</div>
     <div style="font-size:12px;color:var(--t2);line-height:2">
-      版本：v2.3<br>
+      版本：v2.4<br>
       建置日期：<span id="admin-build-date"></span><br>
       IndexedDB：<span id="admin-db-status">檢查中…</span><br>
       Service Worker：<span id="admin-sw-status">檢查中…</span><br>
@@ -1580,13 +1605,13 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
 function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;document.getElementById('install-banner').style.display='none';}}
 window.addEventListener('appinstalled',()=>{document.getElementById('install-banner').style.display='none';toast('✓ 已安裝到主畫面');});
 
-const manifest={name:'讀書筆記工具箱',short_name:'筆記工具箱',description:'RIA、康乃爾、一書10卡、決策筆記、筆記庫 v2.3',start_url:'.',display:'standalone',background_color:'#0d0d18',theme_color:'#0d0d18',
+const manifest={name:'慢讀筆記',short_name:'慢讀筆記',description:'RIA、康乃爾、一書10卡、決策筆記、筆記庫 v2.3',start_url:'.',display:'standalone',background_color:'#0d0d18',theme_color:'#0d0d18',
   icons:[{src:`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230d0d18'/><text x='96' y='130' text-anchor='middle' font-size='100'>📚</text></svg>`,sizes:'192x192',type:'image/svg+xml'},{src:`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%230d0d18'/><text x='256' y='345' text-anchor='middle' font-size='280'>📚</text></svg>`,sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]};
 document.getElementById('manifest-link').href=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'}));
 
 if('serviceWorker' in navigator){
   const swCode=`
-const C='reading-v23';
+const C='reading-v24';
 const ASSETS=[self.location.href,
   'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'];
 self.addEventListener('install',e=>e.waitUntil(
@@ -1609,8 +1634,18 @@ self.addEventListener('fetch',e=>{
 // ═══════════════════════════════════════════
 // v2.3：首頁引導
 // ═══════════════════════════════════════════
-function onboardGo(paneId, mainIdx, label) {
+function onboardGo(paneId, mainIdx) {
   jumpToTool(mainIdx, paneId);
+  // 收起更多工具（如果展開的話）
+  document.getElementById('ob-more-panel')?.classList.remove('open');
+  document.getElementById('ob-more-toggle')?.classList.remove('open');
+}
+
+function toggleMoreTools() {
+  const panel = document.getElementById('ob-more-panel');
+  const toggle = document.getElementById('ob-more-toggle');
+  panel?.classList.toggle('open');
+  toggle?.classList.toggle('open');
 }
 
 // 時間友善顯示
