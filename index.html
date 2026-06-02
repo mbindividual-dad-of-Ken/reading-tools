@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0d0d18">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="筆記工具箱 v2.2">
-<title>讀書筆記工具箱 v2.2</title>
+<meta name="apple-mobile-web-app-title" content="筆記工具箱 v2.3">
+<title>讀書筆記工具箱 v2.3</title>
 <link rel="manifest" href="#" id="manifest-link">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -259,6 +259,49 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 #install-banner{display:none;background:linear-gradient(135deg,var(--vb),var(--tealb));border:1px solid rgba(124,106,247,.25);border-radius:var(--r);padding:10px 12px;margin-bottom:11px;align-items:center;gap:10px}
 #install-banner p{font-size:12px;color:var(--t2);flex:1;line-height:1.5}
 ::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+/* ─── ONBOARDING 首頁引導 ─── */
+.ob-wrap{padding:24px 0 8px}
+.ob-greeting{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--t1);margin-bottom:6px;line-height:1.3}
+.ob-sub{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.6}
+.ob-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.ob-card{border:1px solid var(--b1);border-radius:var(--r);padding:16px 18px;cursor:pointer;transition:.18s;display:flex;align-items:center;gap:14px;background:var(--s1);touch-action:manipulation;min-height:72px}
+.ob-card:hover,.ob-card:active{border-color:var(--b3);background:var(--s2);transform:translateX(3px)}
+.ob-card.ob-exam{border-left:4px solid var(--v)}
+.ob-card.ob-action{border-left:4px solid var(--teal)}
+.ob-card.ob-manda{border-left:4px solid var(--manda)}
+.ob-icon{font-size:28px;flex-shrink:0;width:36px;text-align:center}
+.ob-text{}
+.ob-label{font-size:15px;font-weight:500;color:var(--t1);margin-bottom:3px}
+.ob-desc{font-size:12px;color:var(--t2);line-height:1.5}
+.ob-divider{display:flex;align-items:center;gap:10px;margin:16px 0 10px}
+.ob-divider::before,.ob-divider::after{content:'';flex:1;height:1px;background:var(--b1)}
+.ob-divider-text{font-size:11px;color:var(--t3);white-space:nowrap}
+.ob-recent{margin-bottom:4px}
+.ob-recent-title{font-size:11px;font-weight:500;color:var(--t3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+.ob-recent-list{display:flex;flex-direction:column;gap:6px}
+.ob-recent-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--rs);background:var(--s1);border:1px solid var(--b1);cursor:pointer;transition:.13s;touch-action:manipulation}
+.ob-recent-item:hover{background:var(--s2);border-color:var(--b2)}
+.ob-ri-icon{font-size:16px;flex-shrink:0}
+.ob-ri-text{flex:1;overflow:hidden}
+.ob-ri-title{font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ob-ri-meta{font-size:11px;color:var(--t3);margin-top:1px}
+.ob-ri-method{font-size:11px;padding:2px 7px;border-radius:10px;background:var(--vb);color:var(--v2);border:1px solid rgba(124,106,247,.2);flex-shrink:0}
+.ob-empty-recent{font-size:12px;color:var(--t3);padding:8px 0;line-height:1.6}
+/* ─── AI PROMPT-FIRST ─── */
+.ai-mode-tabs{display:flex;gap:6px;margin-bottom:12px}
+.ai-mode-btn{flex:1;padding:8px;border-radius:var(--rs);border:1px solid var(--b1);background:transparent;color:var(--t2);font-size:12px;cursor:pointer;text-align:center;transition:.13s;touch-action:manipulation}
+.ai-mode-btn.active{background:var(--vb);border-color:var(--v);color:var(--v2)}
+.ai-prompt-panel{display:block}
+.ai-key-panel{display:none}
+.ai-key-toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t3);cursor:pointer;margin-bottom:10px;padding:6px 0;border-bottom:1px solid var(--b1)}
+.ai-key-toggle svg{width:14px;height:14px;transition:transform .2s}
+.ai-key-toggle.open svg{transform:rotate(180deg)}
+.ai-key-section{display:none;margin-top:8px}
+.ai-key-section.open{display:block}
+.prompt-display{background:#08080f;border:1px solid var(--b1);border-radius:var(--rs);padding:11px;font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--t2);white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto;margin-bottom:10px}
+.ai-copy-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.ai-link-btn{padding:7px 12px;min-height:36px;border-radius:var(--rs);border:1px solid var(--b2);background:transparent;color:var(--t1);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.13s;text-decoration:none}
+.ai-link-btn:hover{background:var(--s2)}
 </style>
 </head>
 <body>
@@ -283,7 +326,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 <header class="hd">
   <div class="hd-title">📚 讀書筆記工具箱</div>
   <div class="autosave-bar" id="autosave-bar"></div>
-  <div class="hd-ver" id="hd-ver">v2.2</div>
+  <div class="hd-ver" id="hd-ver">v2.3</div>
 </header>
 
 <!-- ████ 4 MAIN TABS ████ -->
@@ -296,8 +339,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 
 <!-- ════ SUB TABS per main ════ -->
 <div class="sub-tabs" id="sub-0">
-  <button class="st-btn active" onclick="goSub('sub-0',0,this,'p-sel')">方法選擇器</button>
-  <button class="st-btn" onclick="goSub('sub-0',1,this,'p-compare')">六大方法比較</button>
+  <button class="st-btn active" onclick="goSub('sub-0',0,this,'p-sel')">今天怎麼讀</button>
+  <button class="st-btn" onclick="goSub('sub-0',1,this,'p-recommend')">方法選擇器</button>
+  <button class="st-btn" onclick="goSub('sub-0',2,this,'p-compare')">六大方法比較</button>
 </div>
 <div class="sub-tabs" id="sub-1" style="display:none">
   <button class="st-btn active" onclick="goSub('sub-1',0,this,'p-cornell')">康乃爾 5R</button>
@@ -325,8 +369,55 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
   <button class="btn btn-v" onclick="installPWA()">安裝</button>
 </div>
 
-<!-- ══ 方法選擇器 ══ -->
+<!-- ══ 首頁引導 ══ -->
 <div class="pane active" id="p-sel">
+  <div class="ob-wrap">
+    <div class="ob-greeting" id="ob-greeting">今天你想怎麼讀？</div>
+    <div class="ob-sub">選一個狀態，直接開始。</div>
+    <div class="ob-cards">
+      <div class="ob-card ob-exam" onclick="onboardGo('p-cornell',1,'幫我記得住')">
+        <div class="ob-icon">🧠</div>
+        <div class="ob-text">
+          <div class="ob-label">幫我記得住</div>
+          <div class="ob-desc">考試備考、需要長期記憶的內容<br>→ 康乃爾 5R + 間隔複習排程</div>
+        </div>
+      </div>
+      <div class="ob-card ob-action" onclick="onboardGo('p-ria',1,'幫我變成一個小行動')">
+        <div class="ob-icon">⚡</div>
+        <div class="ob-text">
+          <div class="ob-label">幫我變成一個小行動</div>
+          <div class="ob-desc">把書中的觀點用在生活或工作上<br>→ RIA 便籤法 + A2 行動規劃</div>
+        </div>
+      </div>
+      <div class="ob-card ob-manda" onclick="onboardGo('p-manda',1,'今天碰到一點就好')">
+        <div class="ob-icon">🌿</div>
+        <div class="ob-text">
+          <div class="ob-label">今天碰到一點就好</div>
+          <div class="ob-desc">很累，只想留下一句話<br>→ Manda 低壓閱讀</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ob-divider"><span class="ob-divider-text">或者選其他工具</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px">
+      <button class="btn" style="font-size:12px" onclick="jumpToTool(0,'p-compare')">六大方法比較</button>
+      <button class="btn" style="font-size:12px" onclick="jumpToTool(1,'p-tencard')">一書 10 卡</button>
+      <button class="btn" style="font-size:12px" onclick="jumpToTool(1,'p-zk')">卡片盒</button>
+      <button class="btn" style="font-size:12px" onclick="jumpToTool(1,'p-academic')">學術筆記</button>
+      <button class="btn" style="font-size:12px" onclick="jumpToTool(1,'p-decision')">決策筆記</button>
+    </div>
+
+    <div class="ob-recent" id="ob-recent-section">
+      <div class="ob-recent-title">最近繼續</div>
+      <div class="ob-recent-list" id="ob-recent-list">
+        <div class="ob-empty-recent">還沒有筆記。選一個狀態開始寫第一筆吧。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 方法選擇器（進階） ══ -->
+<div class="pane" id="p-recommend">
   <p style="font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.65">先決定這本書要變成什麼，再決定怎麼記。</p>
   <div class="sel3">
     <div><div class="sel-label">閱讀目的</div>
@@ -632,7 +723,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 
 <!-- ══ AI 解析 ══ -->
 <div class="pane" id="p-ai">
-  <p style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.6">選擇 Prompt 類型，貼入內容，AI 幫你生成對應筆記</p>
+  <p style="font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.6">選擇類型，複製 Prompt 貼到任何 AI 工具，或展開進階選項直接用 API 生成。</p>
   <div class="frow" id="pt-row">
     <button class="f-btn active" onclick="pickPT(0,this)">方法選擇</button>
     <button class="f-btn" onclick="pickPT(1,this)">康乃爾</button>
@@ -641,18 +732,40 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
     <button class="f-btn" onclick="pickPT(4,this)">原子卡片</button>
     <button class="f-btn" onclick="pickPT(5,this)">Manda 低壓</button>
   </div>
-  <textarea id="ai-text" style="min-height:110px" placeholder="貼入書摘、文章段落、課程內容…"></textarea>
-  <div class="field" style="margin-top:10px">
-    <div class="slabel">Anthropic API Key（存本機，不上傳）</div>
-    <input type="password" id="api-key" placeholder="sk-ant-..." style="font-family:var(--mono);font-size:12px">
+  <div class="field">
+    <div class="slabel" style="margin-bottom:5px">Prompt 內容預覽</div>
+    <div class="prompt-display" id="pt-preview"></div>
   </div>
-  <div class="toolbar">
-    <button class="btn btn-v" id="ai-btn" onclick="callAI()">AI 生成筆記</button>
-    <button class="btn" onclick="copyAIPrompt()">複製 Prompt</button>
+  <div class="field">
+    <div class="slabel" style="margin-bottom:5px">你的書摘（選填，複製時一併帶入）</div>
+    <textarea id="ai-text" style="min-height:80px" placeholder="貼入書摘、文章段落…（留空也可以，複製後自己在 AI 工具裡補）"></textarea>
   </div>
-  <p class="loading-msg" id="ai-loading"><span class="spinner"></span>生成中…</p>
-  <div class="ai-result" id="ai-result">
-    <div class="ai-row"><div class="ai-rlabel">AI 輸出</div><div class="ai-rtext" id="ai-output"></div></div>
+  <div class="field">
+    <div class="slabel" style="margin-bottom:7px">複製後貼到哪裡</div>
+    <div class="ai-copy-links">
+      <button class="ai-link-btn btn btn-v" onclick="copyAndOpen('claude')">複製並開啟 Claude</button>
+      <button class="ai-link-btn btn" onclick="copyAndOpen('chatgpt')">複製並開啟 ChatGPT</button>
+      <button class="ai-link-btn btn" onclick="copyAndOpen('gemini')">複製並開啟 Gemini</button>
+      <button class="ai-link-btn btn btn-teal" onclick="copyPromptOnly()">只複製 Prompt</button>
+    </div>
+  </div>
+  <div class="ai-key-toggle" id="ai-key-toggle" onclick="toggleAPIKeySection()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6l4 4 4-4"/></svg>
+    <span>進階：直接用 API 生成（需要 Anthropic API Key）</span>
+  </div>
+  <div class="ai-key-section" id="ai-key-section">
+    <div class="field">
+      <div class="slabel">Anthropic API Key（存本機，不上傳）</div>
+      <input type="password" id="api-key" placeholder="sk-ant-..." style="font-family:var(--mono);font-size:12px">
+      <p class="hint">Key 僅存於本機 localStorage，不會傳送到任何伺服器（除了 Anthropic API 本身）</p>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-v" id="ai-btn" onclick="callAI()">API 直接生成</button>
+    </div>
+    <p class="loading-msg" id="ai-loading"><span class="spinner"></span>生成中…</p>
+    <div class="ai-result" id="ai-result">
+      <div class="ai-row"><div class="ai-rlabel">AI 輸出</div><div class="ai-rtext" id="ai-output"></div></div>
+    </div>
   </div>
 </div>
 
@@ -791,7 +904,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
   <div class="card">
     <div class="slabel" style="margin-bottom:8px">版本資訊</div>
     <div style="font-size:12px;color:var(--t2);line-height:2">
-      版本：v2.2<br>
+      版本：v2.3<br>
       建置日期：<span id="admin-build-date"></span><br>
       IndexedDB：<span id="admin-db-status">檢查中…</span><br>
       Service Worker：<span id="admin-sw-status">檢查中…</span><br>
@@ -806,7 +919,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 // NAVIGATION
 // ═══════════════════════════════════════════
 const mainPaneMap = [
-  ['p-sel','p-compare'],
+  ['p-sel','p-recommend','p-compare'],
   ['p-cornell','p-ria','p-tencard','p-zk','p-academic','p-decision','p-manda'],
   ['p-ai','p-sturgeon'],
   ['p-library','p-journal','p-pwa','p-admin']
@@ -1100,6 +1213,7 @@ async function saveNote(note){
   await dbAdd({...note, createdAt:Date.now(), status:'草稿'});
   toast('✓ 已儲存到筆記庫');
   renderLibrary();
+  renderRecentNotes();
 }
 
 let currentNoteId = null;
@@ -1378,7 +1492,12 @@ const ptTemplates=[
   {name:'Manda低壓',sys:`請用 Manda 的語氣整理以下閱讀內容。不要像效率工具，不要鼓勵變強，不要使用自律、高效、堅持、成功等語氣。輸出：1)今天碰到的一點 2)可以先留下的一句 3)下次回來可以看哪裡 4)最小版本 5)一句適合發 Threads 的短句（不超過50字）。請用繁體中文。`},
 ];
 let currentPT=0;
-function pickPT(idx,btn){currentPT=idx;document.querySelectorAll('#pt-row .f-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function pickPT(idx,btn){
+  currentPT=idx;
+  document.querySelectorAll('#pt-row .f-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updatePromptPreview();
+}
 function getAPIKey(){
   const v=document.getElementById('api-key').value.trim()||localStorage.getItem('anthropic_api_key')||'';
   if(v) localStorage.setItem('anthropic_api_key',v);
@@ -1461,13 +1580,13 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
 function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;document.getElementById('install-banner').style.display='none';}}
 window.addEventListener('appinstalled',()=>{document.getElementById('install-banner').style.display='none';toast('✓ 已安裝到主畫面');});
 
-const manifest={name:'讀書筆記工具箱',short_name:'筆記工具箱',description:'RIA、康乃爾、一書10卡、決策筆記、筆記庫',start_url:'.',display:'standalone',background_color:'#0d0d18',theme_color:'#0d0d18',
+const manifest={name:'讀書筆記工具箱',short_name:'筆記工具箱',description:'RIA、康乃爾、一書10卡、決策筆記、筆記庫 v2.3',start_url:'.',display:'standalone',background_color:'#0d0d18',theme_color:'#0d0d18',
   icons:[{src:`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230d0d18'/><text x='96' y='130' text-anchor='middle' font-size='100'>📚</text></svg>`,sizes:'192x192',type:'image/svg+xml'},{src:`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%230d0d18'/><text x='256' y='345' text-anchor='middle' font-size='280'>📚</text></svg>`,sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]};
 document.getElementById('manifest-link').href=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'}));
 
 if('serviceWorker' in navigator){
   const swCode=`
-const C='reading-v21';
+const C='reading-v23';
 const ASSETS=[self.location.href,
   'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'];
 self.addEventListener('install',e=>e.waitUntil(
@@ -1485,6 +1604,103 @@ self.addEventListener('fetch',e=>{
   }).catch(()=>caches.match(e.request))));
 });`;
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode],{type:'application/javascript'}))).catch(()=>{});
+}
+
+// ═══════════════════════════════════════════
+// v2.3：首頁引導
+// ═══════════════════════════════════════════
+function onboardGo(paneId, mainIdx, label) {
+  jumpToTool(mainIdx, paneId);
+}
+
+// 時間友善顯示
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  const h = Math.floor(diff / 3600000);
+  const d = Math.floor(diff / 86400000);
+  if (m < 2) return '剛剛';
+  if (m < 60) return `${m} 分鐘前`;
+  if (h < 24) return `${h} 小時前`;
+  if (d === 1) return '昨天';
+  if (d < 7) return `${d} 天前`;
+  return new Date(ts).toLocaleDateString('zh-TW', {month:'numeric',day:'numeric'});
+}
+
+// 最近繼續（筆記庫最新 5 筆）
+async function renderRecentNotes() {
+  try {
+    const notes = await dbGetAll();
+    const recent = notes.sort((a,b)=>b.createdAt-a.createdAt).slice(0,5);
+    const list = document.getElementById('ob-recent-list');
+    if (!list) return;
+    if (!recent.length) {
+      list.innerHTML = '<div class="ob-empty-recent">還沒有筆記。選一個狀態開始寫第一筆吧。</div>';
+      return;
+    }
+    const methodIcons = {'康乃爾':'🧠','RIA':'⚡','一書10卡':'📦','卡片盒':'🗂','學術筆記':'🎓','決策筆記':'☂️','Manda':'🌿'};
+    list.innerHTML = recent.map(n => `
+      <div class="ob-recent-item" onclick="openNote(${n.id})">
+        <div class="ob-ri-icon">${methodIcons[n.method]||'📝'}</div>
+        <div class="ob-ri-text">
+          <div class="ob-ri-title">《${escHtml(n.book||'未命名')}》</div>
+          <div class="ob-ri-meta">${timeAgo(n.createdAt)}</div>
+        </div>
+        <div class="ob-ri-method">${n.method||''}</div>
+      </div>`).join('');
+  } catch(e) {}
+}
+
+// 問候語（依時段）
+function setGreeting() {
+  const h = new Date().getHours();
+  const el = document.getElementById('ob-greeting');
+  if (!el) return;
+  if (h < 6) el.textContent = '還在嗎？今天想留下什麼？';
+  else if (h < 12) el.textContent = '早安，今天你想怎麼讀？';
+  else if (h < 18) el.textContent = '下午了，翻到哪裡了？';
+  else el.textContent = '今天碰到什麼了嗎？';
+}
+
+// ═══════════════════════════════════════════
+// v2.3：AI Prompt 優先
+// ═══════════════════════════════════════════
+function toggleAPIKeySection() {
+  const section = document.getElementById('ai-key-section');
+  const toggle = document.getElementById('ai-key-toggle');
+  const isOpen = section.classList.toggle('open');
+  toggle.classList.toggle('open', isOpen);
+}
+
+function buildFullPrompt() {
+  const sys = ptTemplates[currentPT]?.sys || '';
+  const text = document.getElementById('ai-text')?.value?.trim() || '';
+  return sys + '\n\n內容如下：\n' + (text || '（請在這裡貼入你的書摘內容）');
+}
+
+function updatePromptPreview() {
+  const preview = document.getElementById('pt-preview');
+  if (!preview) return;
+  const sys = ptTemplates[currentPT]?.sys || '';
+  preview.textContent = sys;
+}
+
+function copyPromptOnly() {
+  const p = buildFullPrompt();
+  navigator.clipboard && navigator.clipboard.writeText(p);
+  toast('✓ 已複製 Prompt');
+}
+
+function copyAndOpen(service) {
+  const p = buildFullPrompt();
+  navigator.clipboard && navigator.clipboard.writeText(p);
+  const urls = {
+    claude: 'https://claude.ai',
+    chatgpt: 'https://chatgpt.com',
+    gemini: 'https://gemini.google.com'
+  };
+  toast('✓ Prompt 已複製，正在開啟…');
+  setTimeout(() => window.open(urls[service], '_blank'), 400);
 }
 
 // ═══════════════════════════════════════════
@@ -1664,16 +1880,21 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   buildTenCardTable();
   // 習慣點
   buildDots();
+  // v2.3：首頁引導
+  setGreeting();
   // 比較表
   renderMethods();
   // 自動草稿暫存 (使用者角度)
   setupAutosave();
   // 10卡草稿還原（表格建好後才能 restore）
   restoreTCDrafts();
+  // Prompt 預覽初始化
+  updatePromptPreview();
   // IndexedDB
   try{
     await initDB();
     renderLibrary();
+    renderRecentNotes();
     refreshAdminStats();
   }catch(e){
     document.getElementById('db-list').innerHTML='<div class="empty-state"><p style="font-size:12px;color:var(--t3)">筆記庫無法在此環境使用（需要 IndexedDB 支援）</p></div>';
